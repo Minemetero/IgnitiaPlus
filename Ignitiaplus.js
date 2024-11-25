@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3
+// @version      1.1.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -35,7 +35,7 @@
         if (existingFavicon) {
             existingFavicon.remove();
         } //ensure it inject successful
-        
+
         const faviconLink = document.createElement('link');
         faviconLink.rel = 'shortcut icon';
         faviconLink.href = href;
@@ -322,130 +322,130 @@
         });
     }
 
-   // Sober minibar
-   function addSoberMinibar() {
-    const toolbar = document.createElement('div');
-    Object.assign(toolbar.style, {
-        position: 'fixed',
-        top: '50px', // Positioned below the ☰ button
-        left: '10px',
-        width: '250px',
-        backgroundColor: '#f9f9f9', // Light neutral background
-        color: '#333', // Dark gray text
-        padding: '15px',
-        borderRadius: '10px',
-        border: '1px solid #ddd', // Subtle border
-        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', // Soft shadow
-        fontFamily: '"Arial", sans-serif', // Clean sans-serif font
-        fontSize: '14px',
-        zIndex: '1000',
-        display: 'none', // Initially hidden
-        flexDirection: 'column',
-        alignItems: 'center',
-    });
-    toolbar.id = 'minimalist-toolbar-popup';
+    // Sober minibar
+    function addSoberMinibar() {
+        const toolbar = document.createElement('div');
+        Object.assign(toolbar.style, {
+            position: 'fixed',
+            top: '50px', // Positioned below the ☰ button
+            left: '10px',
+            width: '250px',
+            backgroundColor: '#f9f9f9', // Light neutral background
+            color: '#333', // Dark gray text
+            padding: '15px',
+            borderRadius: '10px',
+            border: '1px solid #ddd', // Subtle border
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', // Soft shadow
+            fontFamily: '"Arial", sans-serif', // Clean sans-serif font
+            fontSize: '14px',
+            zIndex: '1000',
+            display: 'none', // Initially hidden
+            flexDirection: 'column',
+            alignItems: 'center',
+        });
+        toolbar.id = 'minimalist-toolbar-popup';
 
-    // Toggle button to show/hide the toolbar
-    const toggleButton = document.createElement('div');
-    Object.assign(toggleButton.style, {
-        position: 'fixed',
-        top: '10px',
-        left: '10px',
-        width: '50px',
-        height: '50px',
-        backgroundColor: '#007BFF', // Subtle blue
-        color: '#fff', // White text
-        textAlign: 'center',
-        lineHeight: '50px',
-        borderRadius: '50%',
-        fontFamily: '"Arial", sans-serif',
-        fontSize: '20px',
-        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)', // Subtle shadow
-        zIndex: '1001',
-        cursor: 'pointer',
-        userSelect: 'none',
-    });
-    toggleButton.textContent = '☰';
+        // Toggle button to show/hide the toolbar
+        const toggleButton = document.createElement('div');
+        Object.assign(toggleButton.style, {
+            position: 'fixed',
+            top: '10px',
+            left: '10px',
+            width: '50px',
+            height: '50px',
+            backgroundColor: '#007BFF', // Subtle blue
+            color: '#fff', // White text
+            textAlign: 'center',
+            lineHeight: '50px',
+            borderRadius: '50%',
+            fontFamily: '"Arial", sans-serif',
+            fontSize: '20px',
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)', // Subtle shadow
+            zIndex: '1001',
+            cursor: 'pointer',
+            userSelect: 'none',
+        });
+        toggleButton.textContent = '☰';
 
-    toggleButton.addEventListener('click', () => {
-        toolbar.style.display = toolbar.style.display === 'none' ? 'flex' : 'none';
-    });
+        toggleButton.addEventListener('click', () => {
+            toolbar.style.display = toolbar.style.display === 'none' ? 'flex' : 'none';
+        });
 
-    // Add Developer Name
-    const developerName = document.createElement('div');
-    developerName.textContent = 'By Minemetero';//Everyone should remember me
-    Object.assign(developerName.style, {
-        fontWeight: 'bold',
-        marginBottom: '15px',
-        fontSize: '16px',
-        color: '#555', // Medium gray
-    });
-    toolbar.appendChild(developerName);
+        // Add Developer Name
+        const developerName = document.createElement('div');
+        developerName.textContent = 'By Minemetero';//Everyone should remember me
+        Object.assign(developerName.style, {
+            fontWeight: 'bold',
+            marginBottom: '15px',
+            fontSize: '16px',
+            color: '#555', // Medium gray
+        });
+        toolbar.appendChild(developerName);
 
-    // Calculator Tool
-    const calculator = document.createElement('textarea');
-    calculator.id = 'minimalist-calculator';
-    calculator.placeholder = 'Calculator (press Enter to evaluate)';
-    Object.assign(calculator.style, {
-        width: '100%',
-        height: '50px',
-        marginBottom: '15px',
-        padding: '10px',
-        borderRadius: '5px',
-        backgroundColor: '#fff', // White background
-        color: '#333', // Dark text
-        border: '1px solid #ddd',
-        outline: 'none',
-        resize: 'none',
-        fontFamily: '"Arial", sans-serif',
-        fontSize: '14px',
-    });
-    calculator.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            try {
-                const result = eval(calculator.value);
-                calculator.value = `${result}`;
-            } catch {
-                calculator.value = 'Error!';
+        // Calculator Tool
+        const calculator = document.createElement('textarea');
+        calculator.id = 'minimalist-calculator';
+        calculator.placeholder = 'Calculator (press Enter to evaluate)';
+        Object.assign(calculator.style, {
+            width: '100%',
+            height: '50px',
+            marginBottom: '15px',
+            padding: '10px',
+            borderRadius: '5px',
+            backgroundColor: '#fff', // White background
+            color: '#333', // Dark text
+            border: '1px solid #ddd',
+            outline: 'none',
+            resize: 'none',
+            fontFamily: '"Arial", sans-serif',
+            fontSize: '14px',
+        });
+        calculator.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                try {
+                    const result = eval(calculator.value);
+                    calculator.value = `${result}`;
+                } catch {
+                    calculator.value = 'Error!';
+                }
             }
-        }
-    });
-    toolbar.appendChild(calculator);
+        });
+        toolbar.appendChild(calculator);
 
-    // Notes Section
-    const notes = document.createElement('textarea');
-    notes.id = 'minimalist-notes';
-    notes.placeholder = 'Your Notes...';
-    Object.assign(notes.style, {
-        width: '100%',
-        height: '100px',
-        padding: '10px',
-        borderRadius: '5px',
-        backgroundColor: '#fff', // White background
-        color: '#333', // Dark text
-        border: '1px solid #ddd',
-        outline: 'none',
-        resize: 'none',
-        fontFamily: '"Arial", sans-serif',
-        fontSize: '14px',
-    });
-    notes.value = localStorage.getItem('minimalistNotes') || '';
-    notes.addEventListener('input', () => {
-        localStorage.setItem('minimalistNotes', notes.value);
-    });
-    toolbar.appendChild(notes);
+        // Notes Section
+        const notes = document.createElement('textarea');
+        notes.id = 'minimalist-notes';
+        notes.placeholder = 'Your Notes...';
+        Object.assign(notes.style, {
+            width: '100%',
+            height: '100px',
+            padding: '10px',
+            borderRadius: '5px',
+            backgroundColor: '#fff', // White background
+            color: '#333', // Dark text
+            border: '1px solid #ddd',
+            outline: 'none',
+            resize: 'none',
+            fontFamily: '"Arial", sans-serif',
+            fontSize: '14px',
+        });
+        notes.value = localStorage.getItem('minimalistNotes') || '';
+        notes.addEventListener('input', () => {
+            localStorage.setItem('minimalistNotes', notes.value);
+        });
+        toolbar.appendChild(notes);
 
-    document.body.appendChild(toggleButton);
-    document.body.appendChild(toolbar);
+        document.body.appendChild(toggleButton);
+        document.body.appendChild(toolbar);
 
-    // Shortcut Key for Calculator
-    document.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'c') {
-            calculator.focus();
-        }
-    });
-}
+        // Shortcut Key for Calculator
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'c') {
+                calculator.focus();
+            }
+        });
+    }
 
     // Todo List
     function addTodoList() {
