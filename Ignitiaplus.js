@@ -31,6 +31,11 @@
     }
 
     function injectFavicon(href) {
+        const existingFavicon = document.querySelector('link[rel="shortcut icon"]');
+        if (existingFavicon) {
+            existingFavicon.remove();
+        } //ensure it inject successful
+        
         const faviconLink = document.createElement('link');
         faviconLink.rel = 'shortcut icon';
         faviconLink.href = href;
@@ -312,7 +317,7 @@
                 event.returnValue = ''; // Required for some browsers to show the dialog
                 setTimeout(() => {
                     warningActive = false;
-                }, 5000); // Prevent multiple triggers in a short time
+                }, 5000);
             }
         });
     }
