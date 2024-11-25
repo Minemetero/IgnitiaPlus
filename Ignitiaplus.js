@@ -22,26 +22,20 @@
         if (titleElement) {
             if (titleElement.textContent.trim() === 'Ignitia') {
                 titleElement.textContent = 'IgnitiaPlus';
+                injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
             } else if (titleElement.textContent.trim() === 'SwitchedOn') {
                 titleElement.textContent = 'SwitchedOnPlus';
+                injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
             }
         }
+    }
 
-        // Inject new favicon link
-        if (titleElement === 'Ignitia') {
-            const faviconLink = document.createElement('link');
-            faviconLink.rel = 'shortcut icon';
-            faviconLink.href = 'https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png';
-            faviconLink.type = 'image/x-icon';
-            document.head.appendChild(faviconLink);
-        }
-        if (titleElement === 'SwitchedOn') {
-            const faviconLink = document.createElement('link');
-            faviconLink.rel = 'shortcut icon';
-            faviconLink.href = 'https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png';
-            faviconLink.type = 'image/x-icon';
-            document.head.appendChild(faviconLink);
-        }
+    function injectFavicon(href) {
+        const faviconLink = document.createElement('link');
+        faviconLink.rel = 'shortcut icon';
+        faviconLink.href = href;
+        faviconLink.type = 'image/x-icon';
+        document.head.appendChild(faviconLink);
     }
 
     // Remove some useless element
@@ -63,6 +57,18 @@
 
     // Theme Switcher
     function addThemeSwitcher() {
+        const themeSwitcher = createThemeSwitcher();
+        const themeMenu = createThemeMenu();
+
+        themeSwitcher.addEventListener('click', () => {
+            themeMenu.style.display = themeMenu.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        document.body.appendChild(themeSwitcher);
+        document.body.appendChild(themeMenu);
+    }
+
+    function createThemeSwitcher() {
         const themeSwitcher = document.createElement('div');
         Object.assign(themeSwitcher.style, {
             position: 'fixed',
@@ -79,8 +85,10 @@
             userSelect: 'none'
         });
         themeSwitcher.textContent = 'Switch Theme';
+        return themeSwitcher;
+    }
 
-        // Theme Menu
+    function createThemeMenu() {
         const themeMenu = document.createElement('div');
         Object.assign(themeMenu.style, {
             position: 'fixed',
@@ -97,38 +105,39 @@
             flexDirection: 'column'
         });
 
-        const lightThemeBtn = document.createElement('button');
-        lightThemeBtn.textContent = 'Light Theme';
-        const darkThemeBtn = document.createElement('button');
-        darkThemeBtn.textContent = 'Dark Theme(Unfortunately, it not working)';
-        const customThemeBtn = document.createElement('button');
-        customThemeBtn.textContent = 'Custom Background';
+        const themes = [
+            { text: 'Light Theme', class: 'light-theme' },
+            { text: 'Dark Theme', class: 'dark-theme' },
+            { text: 'Custom Background', class: 'custom-theme' }
+        ];
 
-        [lightThemeBtn, darkThemeBtn, customThemeBtn].forEach(btn => {
-            Object.assign(btn.style, {
-                margin: '5px 0',
-                padding: '5px',
-                fontSize: '14px',
-                cursor: 'pointer'
-            });
+        themes.forEach(theme => {
+            const btn = document.createElement('button');
+            btn.textContent = theme.text;
+            btn.style.margin = '5px 0';
+            btn.style.padding = '5px';
+            btn.style.fontSize = '14px';
+            btn.style.cursor = 'pointer';
             btn.addEventListener('click', () => {
+                handleThemeChange(theme.class);
                 themeMenu.style.display = 'none';
             });
+            themeMenu.appendChild(btn);
         });
 
-        lightThemeBtn.addEventListener('click', () => {
+        return themeMenu;
+    }
+
+    function handleThemeChange(theme) {
+        if (theme === 'light-theme') {
             document.body.classList.remove('dark-theme');
             document.body.style.backgroundImage = '';
             localStorage.setItem('theme', 'light');
-        });
-
-        darkThemeBtn.addEventListener('click', () => {
+        } else if (theme === 'dark-theme') {
             document.body.classList.add('dark-theme');
             document.body.style.backgroundImage = '';
             localStorage.setItem('theme', 'dark');
-        });
-
-        customThemeBtn.addEventListener('click', () => {
+        } else if (theme === 'custom-theme') {
             const imageUrl = prompt('Enter the URL of the background image:');
             if (imageUrl) {
                 document.body.classList.remove('dark-theme');
@@ -137,29 +146,7 @@
                 localStorage.setItem('theme', 'custom');
                 localStorage.setItem('customBackground', imageUrl);
             }
-        });
-
-        themeMenu.appendChild(lightThemeBtn);
-        themeMenu.appendChild(darkThemeBtn);
-        themeMenu.appendChild(customThemeBtn);
-
-        themeSwitcher.addEventListener('click', () => {
-            themeMenu.style.display = themeMenu.style.display === 'none' ? 'flex' : 'none';
-        });
-
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-theme');
-        } else if (savedTheme === 'custom') {
-            const imageUrl = localStorage.getItem('customBackground');
-            if (imageUrl) {
-                document.body.style.backgroundImage = `url(${imageUrl})`;
-                document.body.style.backgroundSize = 'cover';
-            }
         }
-
-        document.body.appendChild(themeSwitcher);
-        document.body.appendChild(themeMenu);
     }
 
     // Customizable Clock
