@@ -431,6 +431,13 @@
         });
         todoContainer.id = 'todo-list';
 
+        // Load saved position
+        const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
+        if (savedPosition) {
+            todoContainer.style.left = savedPosition.left;
+            todoContainer.style.top = savedPosition.top;
+        }
+
         const todoHeader = document.createElement('div');
         todoHeader.textContent = '📝 Todo List';
         todoHeader.style.fontWeight = 'bold';
@@ -454,16 +461,13 @@
         todoList.style.padding = '0';
         todoContainer.appendChild(todoList);
 
+        // Load saved todo items
+        const savedTodos = JSON.parse(localStorage.getItem('todoItems')) || [];
+        savedTodos.forEach(todo => addTodoItem(todo));
+
         todoInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && todoInput.value.trim() !== '') {
-                const todoItem = document.createElement('li');
-                todoItem.textContent = todoInput.value;
-                todoItem.style.margin = '5px 0';
-                todoItem.style.cursor = 'pointer';
-                todoItem.addEventListener('click', () => {
-                    todoItem.remove();
-                });
-                todoList.appendChild(todoItem);
+                addTodoItem(todoInput.value);
                 todoInput.value = '';
             }
         });
@@ -487,6 +491,11 @@
 
         document.addEventListener('mouseup', () => {
             isDragging = false;
+            // Save position
+            localStorage.setItem('todoListPosition', JSON.stringify({
+                left: todoContainer.style.left,
+                top: todoContainer.style.top
+            }));
         });
 
         // Resizing functionality
@@ -523,6 +532,24 @@
         });
 
         document.body.appendChild(todoContainer);
+
+        function addTodoItem(todo) {
+            const todoItem = document.createElement('li');
+            todoItem.textContent = todo;
+            todoItem.style.margin = '5px 0';
+            todoItem.style.cursor = 'pointer';
+            todoItem.addEventListener('click', () => {
+                todoItem.remove();
+                saveTodos(); // Save updated todos after removal
+            });
+            todoList.appendChild(todoItem);
+            saveTodos(); // Save new todo
+        }
+
+        function saveTodos() {
+            const todos = Array.from(todoList.children).map(item => item.textContent);
+            localStorage.setItem('todoItems', JSON.stringify(todos));
+        }
     }
 
     // Initialize the enhanced UI and features
