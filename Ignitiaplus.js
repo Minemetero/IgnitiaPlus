@@ -320,8 +320,9 @@
 
         window.addEventListener('beforeunload', (event) => {
             if (!warningActive) {
-                event.preventDefault();
                 warningActive = true;
+                event.preventDefault();
+                event.returnValue = ''; // Required for some browsers to show the dialog
                 setTimeout(() => {
                     warningActive = false;
                 }, 5000); // Prevent multiple triggers in a short time
@@ -419,98 +420,68 @@
             }
         });
         toolbar.appendChild(calculator);
+    }
 
-        // Notes Section
-        const notes = document.createElement('textarea');
-        notes.id = 'minimalist-notes';
-        notes.placeholder = 'Your Notes...';
-        Object.assign(notes.style, {
-            width: '100%',
-            height: '100px',
-            padding: '10px',
-            borderRadius: '5px',
-            backgroundColor: '#fff', // White background
-            color: '#333', // Dark text
-            border: '1px solid #ddd',
-            outline: 'none',
-            resize: 'none',
-            fontFamily: '"Arial", sans-serif',
-            fontSize: '14px',
-        });
-        notes.value = localStorage.getItem('minimalistNotes') || '';
-        notes.addEventListener('input', () => {
-            localStorage.setItem('minimalistNotes', notes.value);
-        });
-        toolbar.appendChild(notes);
-
-        // Add Todo List Toggle Button
-        const todoToggleButton = document.createElement('button');
-        todoToggleButton.textContent = 'Toggle Todo List';
-        Object.assign(todoToggleButton.style, {
-            margin: '10px 0',
-            padding: '5px',
-            fontSize: '14px',
-            cursor: 'pointer',
-        });
-        toolbar.appendChild(todoToggleButton);
-
-        // Create Todo List Container
+    // Todo List
+    function addTodoList() {
         const todoContainer = document.createElement('div');
         Object.assign(todoContainer.style, {
-            position: 'relative',
-            backgroundColor: '#f9f9f9',
-            color: '#333',
-            padding: '15px',
-            borderRadius: '10px',
-            border: '1px solid #ddd',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-            fontFamily: '"Arial", sans-serif',
+            position: 'fixed',
+            bottom: '0px',
+            left: '10px',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            fontFamily: 'Arial, sans-serif',
             fontSize: '14px',
             zIndex: '1000',
             maxWidth: '250px',
-            display: 'none', // Initially hidden
-            flexDirection: 'column',
-            resize: 'both', // Allow resizing
-            overflow: 'auto', // Allow scrolling if content overflows
+            maxHeight: '200px',
+            overflowY: 'auto',
+            cursor: 'move',
+            userSelect: 'none'
         });
-        todoContainer.id = 'todo-list-container';
+        todoContainer.id = 'todo-list';
 
-        // Todo List Header
         const todoHeader = document.createElement('div');
         todoHeader.textContent = '📝 Todo List';
         todoHeader.style.fontWeight = 'bold';
         todoContainer.appendChild(todoHeader);
 
-        // Todo Input
         const todoInput = document.createElement('input');
         todoInput.placeholder = 'Add a new task...';
         Object.assign(todoInput.style, {
-            margin: '5px 0',
+            width: '90%', // Adjusted width for the input box
             padding: '5px',
-            fontSize: '14px',
+            marginTop: '5px',
+            borderRadius: '3px',
+            border: '1px solid #ddd',
+            outline: 'none',
+            fontSize: '14px'
         });
         todoContainer.appendChild(todoInput);
 
-        // Todo List
         const todoList = document.createElement('ul');
+        todoList.style.listStyleType = 'none';
+        todoList.style.padding = '0';
         todoContainer.appendChild(todoList);
 
-        // Add Todo Item on Enter
         todoInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && todoInput.value.trim() !== '') {
                 const todoItem = document.createElement('li');
                 todoItem.textContent = todoInput.value;
+                todoItem.style.margin = '5px 0';
+                todoItem.style.cursor = 'pointer';
+                todoItem.addEventListener('click', () => {
+                    todoItem.remove();
+                });
                 todoList.appendChild(todoItem);
                 todoInput.value = '';
             }
         });
 
-        // Toggle Todo List Visibility
-        todoToggleButton.addEventListener('click', () => {
-            todoContainer.style.display = todoContainer.style.display === 'none' ? 'flex' : 'none';
-        });
-
-        // Make Todo List Movable
+        // Dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
 
@@ -528,15 +499,43 @@
         });
 
         document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
+            isDragging = false;
+        });
+
+        // Resizing functionality
+        const resizeHandle = document.createElement('div');
+        Object.assign(resizeHandle.style, {
+            width: '10px',
+            height: '10px',
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            position: 'absolute',
+            bottom: '5px',
+            right: '5px',
+            cursor: 'nwse-resize'
+        });
+        todoContainer.appendChild(resizeHandle);
+
+        let isResizing = false;
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isResizing) {
+                const newWidth = e.clientX - todoContainer.getBoundingClientRect().left;
+                const newHeight = e.clientY - todoContainer.getBoundingClientRect().top;
+                todoContainer.style.width = `${newWidth}px`;
+                todoContainer.style.height = `${newHeight}px`;
             }
         });
 
-        // Append Todo Container to Toolbar
-        toolbar.appendChild(todoContainer);
-        document.body.appendChild(toggleButton);
-        document.body.appendChild(toolbar);
+        document.addEventListener('mouseup', () => {
+            isResizing = false;
+        });
+
+        document.body.appendChild(todoContainer);
     }
 
     // Initialize the enhanced UI and features
@@ -548,6 +547,7 @@
         addClassTimetable();
         addRefreshWarning();
         addSoberMinibar();
+        addTodoList();
     }
 
     // Apply enhanced dark theme CSS
