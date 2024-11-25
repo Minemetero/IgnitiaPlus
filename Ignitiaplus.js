@@ -310,6 +310,9 @@
     function addRefreshWarning() {
         let warningActive = false;
 
+        if (window.location.href.includes('/owsoo/home')) {
+            return;
+        }
         window.addEventListener('beforeunload', (event) => {
             if (!warningActive) {
                 warningActive = true;
