@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.0.2
+// @version      1.0.3
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -22,17 +22,26 @@
         if (titleElement) {
             if (titleElement.textContent.trim() === 'Ignitia') {
                 titleElement.textContent = 'IgnitiaPlus';
-            } else if (titleElement.textContent.trim() === 'SwitchOn') {
-                titleElement.textContent = 'SwitchOnPlus';
+            } else if (titleElement.textContent.trim() === 'SwitchedOn') {
+                titleElement.textContent = 'SwitchedOnPlus';
             }
         }
 
         // Inject new favicon link
-        const faviconLink = document.createElement('link');
-        faviconLink.rel = 'shortcut icon';
-        faviconLink.href = 'https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png';
-        faviconLink.type = 'image/x-icon';
-        document.head.appendChild(faviconLink);
+        if (titleElement === 'Ignitia') {
+            const faviconLink = document.createElement('link');
+            faviconLink.rel = 'shortcut icon';
+            faviconLink.href = 'https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png';
+            faviconLink.type = 'image/x-icon';
+            document.head.appendChild(faviconLink);
+        }
+        if (titleElement === 'SwitchedOn') {
+            const faviconLink = document.createElement('link');
+            faviconLink.rel = 'shortcut icon';
+            faviconLink.href = 'https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png';
+            faviconLink.type = 'image/x-icon';
+            document.head.appendChild(faviconLink);
+        }
     }
 
     // Remove some useless element
