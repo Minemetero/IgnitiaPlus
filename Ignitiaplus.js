@@ -576,15 +576,24 @@
 
         function addTodoItem(todo) {
             const todoItem = document.createElement('li');
-            todoItem.textContent = todo;
+            const currentIndex = todoList.children.length + 1; // Get the current index based on the number of existing items
+            todoItem.textContent = `${currentIndex}. ${todo}`; // Prepend the index to the todo text
             todoItem.style.margin = '5px 0';
             todoItem.style.cursor = 'pointer';
             todoItem.addEventListener('click', () => {
                 todoItem.remove();
                 saveTodos(); // Save updated todos after removal
+                updateTodoList(); // Update the list after removal
             });
             todoList.appendChild(todoItem);
             saveTodos(); // Save new todo
+        }
+
+        function updateTodoList() {
+            // Update the numbering of the todo items
+            Array.from(todoList.children).forEach((item, index) => {
+                item.textContent = `${index + 1}. ${item.textContent.split('. ')[1]}`; // Update the text with the new index
+            });
         }
 
         function saveTodos() {
