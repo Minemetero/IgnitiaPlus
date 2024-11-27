@@ -472,13 +472,6 @@
 
         document.body.appendChild(toggleButton);
         document.body.appendChild(toolbar);
-
-        // Shortcut Key for Calculator
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'c') {
-                calculator.focus();
-            }
-        });
     }
 
     // Todo List
