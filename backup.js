@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.1.1
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -12,6 +12,8 @@
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
+
+// THIS FILE ALWAYS STORGE THE LATEST PUBLISHED RELEASE
 
 (function () {
     'use strict';
@@ -77,14 +79,14 @@
         const themeSwitcher = document.createElement('div');
         Object.assign(themeSwitcher.style, {
             position: 'fixed',
-            bottom: '2vh',
-            left: '2vw',
+            bottom: '10px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '1vh 2vw',
-            borderRadius: '0.5vh',
+            padding: '5px 10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             cursor: 'pointer',
             userSelect: 'none'
@@ -97,14 +99,14 @@
         const themeMenu = document.createElement('div');
         Object.assign(themeMenu.style, {
             position: 'fixed',
-            bottom: '5vh',
-            left: '2vw',
+            bottom: '50px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
             color: 'white',
-            padding: '2vh',
-            borderRadius: '0.5vh',
+            padding: '10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             display: 'none',
             flexDirection: 'column'
@@ -159,14 +161,14 @@
         const clock = document.createElement('div');
         Object.assign(clock.style, {
             position: 'fixed',
-            bottom: '2vh',
-            right: '2vw',
+            bottom: '10px',
+            right: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             color: 'white',
-            padding: '1vh 2vw',
-            borderRadius: '0.5vh',
+            padding: '5px 10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             cursor: 'move',
             userSelect: 'none',
@@ -244,14 +246,14 @@
         const timetableContainer = document.createElement('div');
         Object.assign(timetableContainer.style, {
             position: 'fixed',
-            bottom: '6vh',
-            left: '2vw',
+            bottom: '60px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '2vh',
-            borderRadius: '0.5vh',
+            padding: '10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             maxWidth: '30vw',
             maxHeight: '40vh',
@@ -479,17 +481,17 @@
         const todoContainer = document.createElement('div');
         Object.assign(todoContainer.style, {
             position: 'fixed',
-            bottom: '0vh',
-            left: '2vw',
+            bottom: '0px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '2vh',
-            borderRadius: '0.5vh',
+            padding: '10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
-            maxWidth: '25vw',
-            maxHeight: '20vh',
+            maxWidth: '250px',
+            maxHeight: '200px',
             overflowY: 'auto',
             cursor: 'move',
             userSelect: 'none'
