@@ -169,7 +169,10 @@
             fontSize: '14px',
             zIndex: '1000',
             cursor: 'move',
-            userSelect: 'none'
+            userSelect: 'none',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            overflow: 'hidden',
         });
         clock.id = 'tampermonkey-clock';
 
@@ -192,8 +195,15 @@
 
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
-                clock.style.left = `${e.clientX - offsetX}px`;
-                clock.style.top = `${e.clientY - offsetY}px`;
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+
+                // Constrain within viewport
+                newX = Math.max(0, Math.min(newX, window.innerWidth - clock.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - clock.offsetHeight));
+
+                clock.style.left = `${newX}px`;
+                clock.style.top = `${newY}px`;
                 clock.style.bottom = 'auto';
                 clock.style.right = 'auto';
             }
@@ -211,8 +221,15 @@
 
         const savedPosition = JSON.parse(localStorage.getItem('clockPosition'));
         if (savedPosition) {
-            clock.style.left = savedPosition.left;
-            clock.style.top = savedPosition.top;
+            let savedLeft = parseInt(savedPosition.left, 10);
+            let savedTop = parseInt(savedPosition.top, 10);
+
+            // Constrain within viewport
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - clock.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - clock.offsetHeight));
+
+            clock.style.left = `${savedLeft}px`;
+            clock.style.top = `${savedTop}px`;
             clock.style.bottom = 'auto';
             clock.style.right = 'auto';
         }
@@ -236,19 +253,19 @@
             fontFamily: 'Arial, sans-serif',
             fontSize: '14px',
             zIndex: '1000',
-            maxWidth: '250px',
-            maxHeight: '200px',
+            maxWidth: '30vw',
+            maxHeight: '40vh',
             overflowY: 'auto',
             cursor: 'move',
             userSelect: 'none'
         });
         timetableContainer.id = 'class-timetable';
-
+    
         const timetableHeader = document.createElement('div');
         timetableHeader.textContent = '📅 Class Timetable';
         timetableHeader.style.fontWeight = 'bold';
         timetableContainer.appendChild(timetableHeader);
-
+    
         const timetableBody = document.createElement('textarea');
         Object.assign(timetableBody.style, {
             width: '100%',
@@ -266,45 +283,59 @@
             localStorage.setItem('timetable', timetableBody.value);
         });
         timetableContainer.appendChild(timetableBody);
-
+    
+        // Append the container to the body to calculate its dimensions
+        document.body.appendChild(timetableContainer);
+    
+        const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
+        if (savedPosition) {
+            let savedLeft = parseInt(savedPosition.left, 10);
+            let savedTop = parseInt(savedPosition.top, 10);
+    
+            // Constrain within viewport
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - timetableContainer.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - timetableContainer.offsetHeight));
+    
+            timetableContainer.style.left = `${savedLeft}px`;
+            timetableContainer.style.top = `${savedTop}px`;
+            timetableContainer.style.bottom = 'auto';
+            timetableContainer.style.right = 'auto';
+        }
+    
         let isDragging = false;
         let offsetX, offsetY;
-
+    
         timetableHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - timetableContainer.offsetLeft;
             offsetY = e.clientY - timetableContainer.offsetTop;
         });
-
+    
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
-                timetableContainer.style.left = `${e.clientX - offsetX}px`;
-                timetableContainer.style.top = `${e.clientY - offsetY}px`;
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+    
+                // Constrain within viewport
+                newX = Math.max(0, Math.min(newX, window.innerWidth - timetableContainer.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - timetableContainer.offsetHeight));
+    
+                timetableContainer.style.left = `${newX}px`;
+                timetableContainer.style.top = `${newY}px`;
                 timetableContainer.style.bottom = 'auto';
                 timetableContainer.style.right = 'auto';
             }
         });
-
+    
         document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('timetablePosition', JSON.stringify({
-                    left: timetableContainer.style.left,
-                    top: timetableContainer.style.top
-                }));
-            }
+            isDragging = false;
+            localStorage.setItem('timetablePosition', JSON.stringify({
+                left: timetableContainer.style.left,
+                top: timetableContainer.style.top
+            }));
         });
-
-        const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
-        if (savedPosition) {
-            timetableContainer.style.left = savedPosition.left;
-            timetableContainer.style.top = savedPosition.top;
-            timetableContainer.style.bottom = 'auto';
-            timetableContainer.style.right = 'auto';
-        }
-
-        document.body.appendChild(timetableContainer);
     }
+    
 
     // Anti-falsetouch-refresh
     function addRefreshWarning() {
@@ -475,8 +506,15 @@
         // Load saved position
         const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
         if (savedPosition) {
-            todoContainer.style.left = savedPosition.left;
-            todoContainer.style.top = savedPosition.top;
+            let savedLeft = parseInt(savedPosition.left, 10);
+            let savedTop = parseInt(savedPosition.top, 10);
+    
+            // Constrain within viewport
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
+    
+            todoContainer.style.left = `${savedLeft}px`;
+            todoContainer.style.top = `${savedTop}px`;
         }
 
         const todoHeader = document.createElement('div');
@@ -516,23 +554,29 @@
         // Dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
-
+    
         todoHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - todoContainer.offsetLeft;
             offsetY = e.clientY - todoContainer.offsetTop;
         });
-
+    
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
-                todoContainer.style.left = `${e.clientX - offsetX}px`;
-                todoContainer.style.top = `${e.clientY - offsetY}px`;
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+    
+                // Constrain within viewport
+                newX = Math.max(0, Math.min(newX, window.innerWidth - todoContainer.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - todoContainer.offsetHeight));
+    
+                todoContainer.style.left = `${newX}px`;
+                todoContainer.style.top = `${newY}px`;
             }
         });
-
+    
         document.addEventListener('mouseup', () => {
             isDragging = false;
-            // Save position
             localStorage.setItem('todoListPosition', JSON.stringify({
                 left: todoContainer.style.left,
                 top: todoContainer.style.top
@@ -639,4 +683,39 @@
     document.head.appendChild(styleSheet);
 
     window.addEventListener('load', init);
+    window.addEventListener('resize', () => {
+        // For each element, adjust position if necessary
+        adjustElementPosition(clock, 'clockPosition');
+        adjustElementPosition(timetableContainer, 'timetablePosition');
+        adjustElementPosition(todoContainer, 'todoListPosition');
+    });
+    
+    function adjustElementPosition(element, storageKey) {
+        let rect = element.getBoundingClientRect();
+    
+        let adjustedLeft = rect.left;
+        let adjustedTop = rect.top;
+    
+        if (rect.right > window.innerWidth) {
+            adjustedLeft = window.innerWidth - element.offsetWidth;
+        }
+        if (rect.bottom > window.innerHeight) {
+            adjustedTop = window.innerHeight - element.offsetHeight;
+        }
+        if (rect.left < 0) {
+            adjustedLeft = 0;
+        }
+        if (rect.top < 0) {
+            adjustedTop = 0;
+        }
+    
+        element.style.left = `${adjustedLeft}px`;
+        element.style.top = `${adjustedTop}px`;
+    
+        // Save adjusted position
+        localStorage.setItem(storageKey, JSON.stringify({
+            left: element.style.left,
+            top: element.style.top
+        }));
+    }
 })();
