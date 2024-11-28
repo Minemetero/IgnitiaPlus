@@ -77,14 +77,14 @@
         const themeSwitcher = document.createElement('div');
         Object.assign(themeSwitcher.style, {
             position: 'fixed',
-            bottom: '2vh',
-            left: '2vw',
+            bottom: '10px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '1vh 2vw',
-            borderRadius: '0.5vh',
+            padding: '5px 10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             cursor: 'pointer',
             userSelect: 'none'
@@ -97,14 +97,14 @@
         const themeMenu = document.createElement('div');
         Object.assign(themeMenu.style, {
             position: 'fixed',
-            bottom: '5vh',
-            left: '2vw',
+            bottom: '50px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
             color: 'white',
-            padding: '2vh',
-            borderRadius: '0.5vh',
+            padding: '10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             display: 'none',
             flexDirection: 'column'
@@ -159,14 +159,14 @@
         const clock = document.createElement('div');
         Object.assign(clock.style, {
             position: 'fixed',
-            bottom: '2vh',
-            right: '2vw',
+            bottom: '10px',
+            right: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             color: 'white',
-            padding: '1vh 2vw',
-            borderRadius: '0.5vh',
+            padding: '5px 10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             cursor: 'move',
             userSelect: 'none',
@@ -244,14 +244,14 @@
         const timetableContainer = document.createElement('div');
         Object.assign(timetableContainer.style, {
             position: 'fixed',
-            bottom: '6vh',
-            left: '2vw',
+            bottom: '60px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '2vh',
-            borderRadius: '0.5vh',
+            padding: '10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
             maxWidth: '30vw',
             maxHeight: '40vh',
@@ -260,12 +260,12 @@
             userSelect: 'none'
         });
         timetableContainer.id = 'class-timetable';
-    
+
         const timetableHeader = document.createElement('div');
         timetableHeader.textContent = '📅 Class Timetable';
         timetableHeader.style.fontWeight = 'bold';
         timetableContainer.appendChild(timetableHeader);
-    
+
         const timetableBody = document.createElement('textarea');
         Object.assign(timetableBody.style, {
             width: '100%',
@@ -283,50 +283,50 @@
             localStorage.setItem('timetable', timetableBody.value);
         });
         timetableContainer.appendChild(timetableBody);
-    
+
         // Append the container to the body to calculate its dimensions
         document.body.appendChild(timetableContainer);
-    
+
         const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
-    
+
             // Constrain within viewport
             savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - timetableContainer.offsetWidth));
             savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - timetableContainer.offsetHeight));
-    
+
             timetableContainer.style.left = `${savedLeft}px`;
             timetableContainer.style.top = `${savedTop}px`;
             timetableContainer.style.bottom = 'auto';
             timetableContainer.style.right = 'auto';
         }
-    
+
         let isDragging = false;
         let offsetX, offsetY;
-    
+
         timetableHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - timetableContainer.offsetLeft;
             offsetY = e.clientY - timetableContainer.offsetTop;
         });
-    
+
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
                 let newX = e.clientX - offsetX;
                 let newY = e.clientY - offsetY;
-    
+
                 // Constrain within viewport
                 newX = Math.max(0, Math.min(newX, window.innerWidth - timetableContainer.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - timetableContainer.offsetHeight));
-    
+
                 timetableContainer.style.left = `${newX}px`;
                 timetableContainer.style.top = `${newY}px`;
                 timetableContainer.style.bottom = 'auto';
                 timetableContainer.style.right = 'auto';
             }
         });
-    
+
         document.addEventListener('mouseup', () => {
             isDragging = false;
             localStorage.setItem('timetablePosition', JSON.stringify({
@@ -335,7 +335,7 @@
             }));
         });
     }
-    
+
 
     // Anti-falsetouch-refresh
     function addRefreshWarning() {
@@ -407,7 +407,7 @@
 
         // Add Developer Name
         const developerName = document.createElement('div');
-        developerName.textContent = 'By Minemetero';//Everyone should remember me
+        developerName.textContent = 'By Minemetero'; // Everyone should remember me
         Object.assign(developerName.style, {
             fontWeight: 'bold',
             marginBottom: '15px',
@@ -470,6 +470,60 @@
         });
         toolbar.appendChild(notes);
 
+        // Add Toggle Menu within Sober Minibar
+        const toggleMenu = document.createElement('div');
+        Object.assign(toggleMenu.style, {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '14px',
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: '10px',
+            width: '100%',
+        });
+
+        const widgets = [
+            { name: 'Clock', id: 'clock', initFunction: addCustomizableClock },
+            { name: 'Theme Switcher', id: 'themeSwitcher', initFunction: addThemeSwitcher },
+            { name: 'Class Timetable', id: 'classTimetable', initFunction: addClassTimetable },
+            { name: 'Todo List', id: 'todoList', initFunction: addTodoList }
+        ];
+
+        widgets.forEach(widget => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = widget.id;
+            checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
+            checkbox.addEventListener('change', () => {
+                localStorage.setItem(widget.id, checkbox.checked);
+                if (checkbox.checked) {
+                    widget.initFunction();
+                } else {
+                    document.getElementById(widget.id)?.remove();
+                }
+            });
+
+            const label = document.createElement('label');
+            label.htmlFor = widget.id;
+            label.textContent = widget.name;
+            label.style.marginBottom = '10px';
+            label.style.cursor = 'pointer';
+
+            const widgetContainer = document.createElement('div');
+            widgetContainer.style.display = 'flex';
+            widgetContainer.style.alignItems = 'center';
+            widgetContainer.style.marginBottom = '5px';
+
+            widgetContainer.appendChild(checkbox);
+            widgetContainer.appendChild(label);
+            toggleMenu.appendChild(widgetContainer);
+        });
+
+        toolbar.appendChild(toggleMenu);
+
         document.body.appendChild(toggleButton);
         document.body.appendChild(toolbar);
     }
@@ -479,17 +533,17 @@
         const todoContainer = document.createElement('div');
         Object.assign(todoContainer.style, {
             position: 'fixed',
-            bottom: '0vh',
-            left: '2vw',
+            bottom: '0px',
+            left: '10px',
             backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
-            padding: '2vh',
-            borderRadius: '0.5vh',
+            padding: '10px',
+            borderRadius: '5px',
             fontFamily: 'Arial, sans-serif',
-            fontSize: '1.5vh',
+            fontSize: '14px',
             zIndex: '1000',
-            maxWidth: '25vw',
-            maxHeight: '20vh',
+            maxWidth: '250px',
+            maxHeight: '200px',
             overflowY: 'auto',
             cursor: 'move',
             userSelect: 'none'
@@ -501,11 +555,11 @@
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
-    
+
             // Constrain within viewport
             savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
             savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
-    
+
             todoContainer.style.left = `${savedLeft}px`;
             todoContainer.style.top = `${savedTop}px`;
         }
@@ -547,27 +601,27 @@
         // Dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
-    
+
         todoHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - todoContainer.offsetLeft;
             offsetY = e.clientY - todoContainer.offsetTop;
         });
-    
+
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
                 let newX = e.clientX - offsetX;
                 let newY = e.clientY - offsetY;
-    
+
                 // Constrain within viewport
                 newX = Math.max(0, Math.min(newX, window.innerWidth - todoContainer.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - todoContainer.offsetHeight));
-    
+
                 todoContainer.style.left = `${newX}px`;
                 todoContainer.style.top = `${newY}px`;
             }
         });
-    
+
         document.addEventListener('mouseup', () => {
             isDragging = false;
             localStorage.setItem('todoListPosition', JSON.stringify({
@@ -643,12 +697,12 @@
     function init() {
         modifyPageHead();
         removeUnwantedElements();
-        addCustomizableClock();
-        addThemeSwitcher();
-        addClassTimetable();
-        addRefreshWarning();
-        addSoberMinibar();
-        addTodoList();
+        addSoberMinibar()
+        // Initialize widgets based on user preferences
+        if (JSON.parse(localStorage.getItem('clock') || 'true')) addCustomizableClock();
+        if (JSON.parse(localStorage.getItem('themeSwitcher') || 'true')) addThemeSwitcher();
+        if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
+        if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
     }
 
     // Apply enhanced dark theme CSS
@@ -682,13 +736,13 @@
         adjustElementPosition(timetableContainer, 'timetablePosition');
         adjustElementPosition(todoContainer, 'todoListPosition');
     });
-    
+
     function adjustElementPosition(element, storageKey) {
         let rect = element.getBoundingClientRect();
-    
+
         let adjustedLeft = rect.left;
         let adjustedTop = rect.top;
-    
+
         if (rect.right > window.innerWidth) {
             adjustedLeft = window.innerWidth - element.offsetWidth;
         }
@@ -701,10 +755,10 @@
         if (rect.top < 0) {
             adjustedTop = 0;
         }
-    
+
         element.style.left = `${adjustedLeft}px`;
         element.style.top = `${adjustedTop}px`;
-    
+
         // Save adjusted position
         localStorage.setItem(storageKey, JSON.stringify({
             left: element.style.left,

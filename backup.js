@@ -262,12 +262,12 @@
             userSelect: 'none'
         });
         timetableContainer.id = 'class-timetable';
-    
+
         const timetableHeader = document.createElement('div');
         timetableHeader.textContent = '📅 Class Timetable';
         timetableHeader.style.fontWeight = 'bold';
         timetableContainer.appendChild(timetableHeader);
-    
+
         const timetableBody = document.createElement('textarea');
         Object.assign(timetableBody.style, {
             width: '100%',
@@ -285,50 +285,50 @@
             localStorage.setItem('timetable', timetableBody.value);
         });
         timetableContainer.appendChild(timetableBody);
-    
+
         // Append the container to the body to calculate its dimensions
         document.body.appendChild(timetableContainer);
-    
+
         const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
-    
+
             // Constrain within viewport
             savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - timetableContainer.offsetWidth));
             savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - timetableContainer.offsetHeight));
-    
+
             timetableContainer.style.left = `${savedLeft}px`;
             timetableContainer.style.top = `${savedTop}px`;
             timetableContainer.style.bottom = 'auto';
             timetableContainer.style.right = 'auto';
         }
-    
+
         let isDragging = false;
         let offsetX, offsetY;
-    
+
         timetableHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - timetableContainer.offsetLeft;
             offsetY = e.clientY - timetableContainer.offsetTop;
         });
-    
+
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
                 let newX = e.clientX - offsetX;
                 let newY = e.clientY - offsetY;
-    
+
                 // Constrain within viewport
                 newX = Math.max(0, Math.min(newX, window.innerWidth - timetableContainer.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - timetableContainer.offsetHeight));
-    
+
                 timetableContainer.style.left = `${newX}px`;
                 timetableContainer.style.top = `${newY}px`;
                 timetableContainer.style.bottom = 'auto';
                 timetableContainer.style.right = 'auto';
             }
         });
-    
+
         document.addEventListener('mouseup', () => {
             isDragging = false;
             localStorage.setItem('timetablePosition', JSON.stringify({
@@ -337,7 +337,7 @@
             }));
         });
     }
-    
+
 
     // Anti-falsetouch-refresh
     function addRefreshWarning() {
@@ -503,11 +503,11 @@
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
-    
+
             // Constrain within viewport
             savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
             savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
-    
+
             todoContainer.style.left = `${savedLeft}px`;
             todoContainer.style.top = `${savedTop}px`;
         }
@@ -549,27 +549,27 @@
         // Dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
-    
+
         todoHeader.addEventListener('mousedown', (e) => {
             isDragging = true;
             offsetX = e.clientX - todoContainer.offsetLeft;
             offsetY = e.clientY - todoContainer.offsetTop;
         });
-    
+
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
                 let newX = e.clientX - offsetX;
                 let newY = e.clientY - offsetY;
-    
+
                 // Constrain within viewport
                 newX = Math.max(0, Math.min(newX, window.innerWidth - todoContainer.offsetWidth));
                 newY = Math.max(0, Math.min(newY, window.innerHeight - todoContainer.offsetHeight));
-    
+
                 todoContainer.style.left = `${newX}px`;
                 todoContainer.style.top = `${newY}px`;
             }
         });
-    
+
         document.addEventListener('mouseup', () => {
             isDragging = false;
             localStorage.setItem('todoListPosition', JSON.stringify({
@@ -684,13 +684,13 @@
         adjustElementPosition(timetableContainer, 'timetablePosition');
         adjustElementPosition(todoContainer, 'todoListPosition');
     });
-    
+
     function adjustElementPosition(element, storageKey) {
         let rect = element.getBoundingClientRect();
-    
+
         let adjustedLeft = rect.left;
         let adjustedTop = rect.top;
-    
+
         if (rect.right > window.innerWidth) {
             adjustedLeft = window.innerWidth - element.offsetWidth;
         }
@@ -703,10 +703,10 @@
         if (rect.top < 0) {
             adjustedTop = 0;
         }
-    
+
         element.style.left = `${adjustedLeft}px`;
         element.style.top = `${adjustedTop}px`;
-    
+
         // Save adjusted position
         localStorage.setItem(storageKey, JSON.stringify({
             left: element.style.left,
