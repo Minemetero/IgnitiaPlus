@@ -659,12 +659,22 @@
             sepia: 0,
         });
         btn.textContent = '🔅';
+
+        const logoElement = document.querySelector('#gl_logo img');
+        if (logoElement) {
+            logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+        }
     }
 
     // Disable Dark Mode
     function disableDarkMode() {
         DarkReader.disable();
         btn.textContent = '🔆';
+
+        const logoElement = document.querySelector('#gl_logo img');
+        if (logoElement) {
+            logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+        }
     }
 
     // Adjust element position within viewport
@@ -711,7 +721,6 @@
         if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
         if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
     }
-
     window.addEventListener('load', init);
     window.addEventListener('resize', () => {
         adjustElementPosition(clock, 'clockPosition');
@@ -719,3 +728,4 @@
         adjustElementPosition(todoContainer, 'todoListPosition');
     });
 })();
+
