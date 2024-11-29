@@ -654,9 +654,9 @@
     function enableDarkMode() {
         DarkReader.setFetchMethod(window.fetch);
         DarkReader.enable({
-            brightness: 100,
-            contrast: 90,
-            sepia: 10,
+            brightness: 105,
+            contrast: 105,
+            sepia: 0,
         });
         btn.textContent = '🔅';
     }
