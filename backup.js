@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.1.1
+// @version      1.2.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -25,7 +25,7 @@
             if (titleElement.textContent.trim() === 'Ignitia') {
                 titleElement.textContent = 'IgnitiaPlus';
                 injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
-            } else if (titleElement.textContent.trim() === 'SwitchedOn') {
+            } else if (titleElement.textContent.trim() === 'switchedonuk') {
                 titleElement.textContent = 'SwitchedOnPlus';
                 injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
             }
@@ -409,7 +409,7 @@
 
         // Add Developer Name
         const developerName = document.createElement('div');
-        developerName.textContent = 'By Minemetero';//Everyone should remember me
+        developerName.textContent = 'By Minemetero'; // Everyone should remember me
         Object.assign(developerName.style, {
             fontWeight: 'bold',
             marginBottom: '15px',
@@ -471,6 +471,60 @@
             localStorage.setItem('minimalistNotes', notes.value);
         });
         toolbar.appendChild(notes);
+
+        // Add Toggle Menu within Sober Minibar
+        const toggleMenu = document.createElement('div');
+        Object.assign(toggleMenu.style, {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            color: 'white',
+            padding: '10px',
+            borderRadius: '5px',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '14px',
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: '10px',
+            width: '100%',
+        });
+
+        const widgets = [
+            { name: 'Clock', id: 'clock', initFunction: addCustomizableClock },
+            { name: 'Theme Switcher', id: 'themeSwitcher', initFunction: addThemeSwitcher },
+            { name: 'Class Timetable', id: 'classTimetable', initFunction: addClassTimetable },
+            { name: 'Todo List', id: 'todoList', initFunction: addTodoList }
+        ];
+
+        widgets.forEach(widget => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = widget.id;
+            checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
+            checkbox.addEventListener('change', () => {
+                localStorage.setItem(widget.id, checkbox.checked);
+                if (checkbox.checked) {
+                    widget.initFunction();
+                } else {
+                    document.getElementById(widget.id)?.remove();
+                }
+            });
+
+            const label = document.createElement('label');
+            label.htmlFor = widget.id;
+            label.textContent = widget.name;
+            label.style.marginBottom = '10px';
+            label.style.cursor = 'pointer';
+
+            const widgetContainer = document.createElement('div');
+            widgetContainer.style.display = 'flex';
+            widgetContainer.style.alignItems = 'center';
+            widgetContainer.style.marginBottom = '5px';
+
+            widgetContainer.appendChild(checkbox);
+            widgetContainer.appendChild(label);
+            toggleMenu.appendChild(widgetContainer);
+        });
+
+        toolbar.appendChild(toggleMenu);
 
         document.body.appendChild(toggleButton);
         document.body.appendChild(toolbar);
@@ -645,12 +699,12 @@
     function init() {
         modifyPageHead();
         removeUnwantedElements();
-        addCustomizableClock();
-        addThemeSwitcher();
-        addClassTimetable();
-        addRefreshWarning();
-        addSoberMinibar();
-        addTodoList();
+        addSoberMinibar()
+        // Initialize widgets based on user preferences
+        if (JSON.parse(localStorage.getItem('clock') || 'true')) addCustomizableClock();
+        if (JSON.parse(localStorage.getItem('themeSwitcher') || 'true')) addThemeSwitcher();
+        if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
+        if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
     }
 
     // Apply enhanced dark theme CSS

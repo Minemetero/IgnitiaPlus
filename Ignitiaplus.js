@@ -1,14 +1,16 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.2.0
+// @version      1.3.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
 // @match        *://*.ignitiaschools.com/*
 // @exclude      *://*.ignitiaschools.com/owsoo/login/auth
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=ignitiaschools.com
-// @grant        none
+// @grant        GM.getValue
+// @grant        GM.setValue
+// @require      https://unpkg.com/darkreader@latest/darkreader.js
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
@@ -16,25 +18,29 @@
 (function () {
     'use strict';
 
-    // it just cool I guess
+    // Global variables for widgets
+    let clock, timetableContainer, todoContainer;
+
+    // Modify the page title and favicon
     function modifyPageHead() {
         const titleElement = document.querySelector('title');
         if (titleElement) {
             if (titleElement.textContent.trim() === 'Ignitia') {
                 titleElement.textContent = 'IgnitiaPlus';
                 injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
-            } else if (titleElement.textContent.trim() === 'SwitchedOn') {
+            } else if (titleElement.textContent.trim() === 'switchedonuk') {
                 titleElement.textContent = 'SwitchedOnPlus';
                 injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
             }
         }
     }
 
+    // Inject favicon into the page
     function injectFavicon(href) {
         const existingFavicon = document.querySelector('link[rel="shortcut icon"]');
         if (existingFavicon) {
             existingFavicon.remove();
-        } //ensure it inject successful
+        }
 
         const faviconLink = document.createElement('link');
         faviconLink.rel = 'shortcut icon';
@@ -43,120 +49,26 @@
         document.head.appendChild(faviconLink);
     }
 
-    // Remove some useless element
+    // Remove unwanted elements from the page
     function removeUnwantedElements() {
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
-        const footerElement = document.getElementById('footer'); // I'm bad to make it to stay at bottom, so just remove it.
+        const footerElement = document.getElementById('footer');
 
         if (signOutElement) {
             signOutElement.remove();
         }
 
         if (footerElement) {
-            footerElement.remove(); // Added line to remove the footer
+            footerElement.remove();
         }
 
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
-    // Theme Switcher
-    function addThemeSwitcher() {
-        const themeSwitcher = createThemeSwitcher();
-        const themeMenu = createThemeMenu();
-
-        themeSwitcher.addEventListener('click', () => {
-            themeMenu.style.display = themeMenu.style.display === 'none' ? 'flex' : 'none';
-        });
-
-        document.body.appendChild(themeSwitcher);
-        document.body.appendChild(themeMenu);
-    }
-
-    function createThemeSwitcher() {
-        const themeSwitcher = document.createElement('div');
-        Object.assign(themeSwitcher.style, {
-            position: 'fixed',
-            bottom: '10px',
-            left: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '14px',
-            zIndex: '1000',
-            cursor: 'pointer',
-            userSelect: 'none'
-        });
-        themeSwitcher.textContent = 'Switch Theme';
-        return themeSwitcher;
-    }
-
-    function createThemeMenu() {
-        const themeMenu = document.createElement('div');
-        Object.assign(themeMenu.style, {
-            position: 'fixed',
-            bottom: '50px',
-            left: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '14px',
-            zIndex: '1000',
-            display: 'none',
-            flexDirection: 'column'
-        });
-
-        const themes = [
-            { text: 'Light Theme', class: 'light-theme' },
-            { text: 'Dark Theme', class: 'dark-theme' },
-            { text: 'Custom Background', class: 'custom-theme' }
-        ];
-
-        themes.forEach(theme => {
-            const btn = document.createElement('button');
-            btn.textContent = theme.text;
-            btn.style.margin = '5px 0';
-            btn.style.padding = '5px';
-            btn.style.fontSize = '14px';
-            btn.style.cursor = 'pointer';
-            btn.addEventListener('click', () => {
-                handleThemeChange(theme.class);
-                themeMenu.style.display = 'none';
-            });
-            themeMenu.appendChild(btn);
-        });
-
-        return themeMenu;
-    }
-
-    function handleThemeChange(theme) {
-        if (theme === 'light-theme') {
-            document.body.classList.remove('dark-theme');
-            document.body.style.backgroundImage = '';
-            localStorage.setItem('theme', 'light');
-        } else if (theme === 'dark-theme') {
-            document.body.classList.add('dark-theme');
-            document.body.style.backgroundImage = '';
-            localStorage.setItem('theme', 'dark');
-        } else if (theme === 'custom-theme') {
-            const imageUrl = prompt('Enter the URL of the background image:');
-            if (imageUrl) {
-                document.body.classList.remove('dark-theme');
-                document.body.style.backgroundImage = `url(${imageUrl})`;
-                document.body.style.backgroundSize = 'cover';
-                localStorage.setItem('theme', 'custom');
-                localStorage.setItem('customBackground', imageUrl);
-            }
-        }
-    }
-
-    // Customizable Clock
+    // Add a customizable clock to the page
     function addCustomizableClock() {
-        const clock = document.createElement('div');
+        clock = document.createElement('div');
         Object.assign(clock.style, {
             position: 'fixed',
             bottom: '10px',
@@ -174,7 +86,7 @@
             maxHeight: '90vh',
             overflow: 'hidden',
         });
-        clock.id = 'tampermonkey-clock';
+        clock.id = 'clock';
 
         function updateClock() {
             const now = new Date();
@@ -239,9 +151,9 @@
         document.body.appendChild(clock);
     }
 
-    // Class Timetable
+    // Add class timetable widget
     function addClassTimetable() {
-        const timetableContainer = document.createElement('div');
+        timetableContainer = document.createElement('div');
         Object.assign(timetableContainer.style, {
             position: 'fixed',
             bottom: '60px',
@@ -259,7 +171,7 @@
             cursor: 'move',
             userSelect: 'none'
         });
-        timetableContainer.id = 'class-timetable';
+        timetableContainer.id = 'timetableContainer';
 
         const timetableHeader = document.createElement('div');
         timetableHeader.textContent = '📅 Class Timetable';
@@ -284,7 +196,6 @@
         });
         timetableContainer.appendChild(timetableBody);
 
-        // Append the container to the body to calculate its dimensions
         document.body.appendChild(timetableContainer);
 
         const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
@@ -328,16 +239,17 @@
         });
 
         document.addEventListener('mouseup', () => {
-            isDragging = false;
-            localStorage.setItem('timetablePosition', JSON.stringify({
-                left: timetableContainer.style.left,
-                top: timetableContainer.style.top
-            }));
+            if (isDragging) {
+                isDragging = false;
+                localStorage.setItem('timetablePosition', JSON.stringify({
+                    left: timetableContainer.style.left,
+                    top: timetableContainer.style.top
+                }));
+            }
         });
     }
 
-
-    // Anti-falsetouch-refresh
+    // Add refresh warning to prevent accidental navigation
     function addRefreshWarning() {
         let warningActive = false;
 
@@ -356,24 +268,24 @@
         });
     }
 
-    // Sober minibar
+    // Add sober minibar with tools
     function addSoberMinibar() {
         const toolbar = document.createElement('div');
         Object.assign(toolbar.style, {
             position: 'fixed',
-            top: '50px', // Positioned below the ☰ button
+            top: '50px',
             left: '10px',
             width: '250px',
-            backgroundColor: '#f9f9f9', // Light neutral background
-            color: '#333', // Dark gray text
+            backgroundColor: '#f9f9f9',
+            color: '#333',
             padding: '15px',
             borderRadius: '10px',
-            border: '1px solid #ddd', // Subtle border
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)', // Soft shadow
-            fontFamily: '"Arial", sans-serif', // Clean sans-serif font
+            border: '1px solid #ddd',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+            fontFamily: '"Arial", sans-serif',
             fontSize: '14px',
             zIndex: '1000',
-            display: 'none', // Initially hidden
+            display: 'none',
             flexDirection: 'column',
             alignItems: 'center',
         });
@@ -387,14 +299,14 @@
             left: '10px',
             width: '50px',
             height: '50px',
-            backgroundColor: '#007BFF', // Subtle blue
-            color: '#fff', // White text
+            backgroundColor: '#007BFF',
+            color: '#fff',
             textAlign: 'center',
             lineHeight: '50px',
             borderRadius: '50%',
             fontFamily: '"Arial", sans-serif',
             fontSize: '20px',
-            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)', // Subtle shadow
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
             zIndex: '1001',
             cursor: 'pointer',
             userSelect: 'none',
@@ -407,12 +319,12 @@
 
         // Add Developer Name
         const developerName = document.createElement('div');
-        developerName.textContent = 'By Minemetero'; // Everyone should remember me
+        developerName.textContent = 'By Minemetero';
         Object.assign(developerName.style, {
             fontWeight: 'bold',
             marginBottom: '15px',
             fontSize: '16px',
-            color: '#555', // Medium gray
+            color: '#555',
         });
         toolbar.appendChild(developerName);
 
@@ -426,8 +338,8 @@
             marginBottom: '15px',
             padding: '10px',
             borderRadius: '5px',
-            backgroundColor: '#fff', // White background
-            color: '#333', // Dark text
+            backgroundColor: '#fff',
+            color: '#333',
             border: '1px solid #ddd',
             outline: 'none',
             resize: 'none',
@@ -456,8 +368,8 @@
             height: '100px',
             padding: '10px',
             borderRadius: '5px',
-            backgroundColor: '#fff', // White background
-            color: '#333', // Dark text
+            backgroundColor: '#fff',
+            color: '#333',
             border: '1px solid #ddd',
             outline: 'none',
             resize: 'none',
@@ -487,7 +399,6 @@
 
         const widgets = [
             { name: 'Clock', id: 'clock', initFunction: addCustomizableClock },
-            { name: 'Theme Switcher', id: 'themeSwitcher', initFunction: addThemeSwitcher },
             { name: 'Class Timetable', id: 'classTimetable', initFunction: addClassTimetable },
             { name: 'Todo List', id: 'todoList', initFunction: addTodoList }
         ];
@@ -528,9 +439,9 @@
         document.body.appendChild(toolbar);
     }
 
-    // Todo List
+    // Add todo list widget
     function addTodoList() {
-        const todoContainer = document.createElement('div');
+        todoContainer = document.createElement('div');
         Object.assign(todoContainer.style, {
             position: 'fixed',
             bottom: '0px',
@@ -548,7 +459,7 @@
             cursor: 'move',
             userSelect: 'none'
         });
-        todoContainer.id = 'todo-list';
+        todoContainer.id = 'todoContainer';
 
         // Load saved position
         const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
@@ -572,7 +483,7 @@
         const todoInput = document.createElement('input');
         todoInput.placeholder = 'Add a new task...';
         Object.assign(todoInput.style, {
-            width: '90%', // Adjusted width for the input box
+            width: '90%',
             padding: '5px',
             marginTop: '5px',
             borderRadius: '3px',
@@ -623,11 +534,13 @@
         });
 
         document.addEventListener('mouseup', () => {
-            isDragging = false;
-            localStorage.setItem('todoListPosition', JSON.stringify({
-                left: todoContainer.style.left,
-                top: todoContainer.style.top
-            }));
+            if (isDragging) {
+                isDragging = false;
+                localStorage.setItem('todoListPosition', JSON.stringify({
+                    left: todoContainer.style.left,
+                    top: todoContainer.style.top
+                }));
+            }
         });
 
         // Resizing functionality
@@ -667,77 +580,96 @@
 
         function addTodoItem(todo) {
             const todoItem = document.createElement('li');
-            const currentIndex = todoList.children.length + 1; // Get the current index based on the number of existing items
-            todoItem.textContent = `${currentIndex}. ${todo}`; // Prepend the index to the todo text
+            const currentIndex = todoList.children.length + 1;
+            todoItem.textContent = `${currentIndex}. ${todo}`;
             todoItem.style.margin = '5px 0';
             todoItem.style.cursor = 'pointer';
             todoItem.addEventListener('click', () => {
                 todoItem.remove();
-                saveTodos(); // Save updated todos after removal
-                updateTodoList(); // Update the list after removal
+                saveTodos();
+                updateTodoList();
             });
             todoList.appendChild(todoItem);
-            saveTodos(); // Save new todo
+            saveTodos();
         }
 
         function updateTodoList() {
             // Update the numbering of the todo items
             Array.from(todoList.children).forEach((item, index) => {
-                item.textContent = `${index + 1}. ${item.textContent.split('. ')[1]}`; // Update the text with the new index
+                item.textContent = `${index + 1}. ${item.textContent.split('. ')[1]}`;
             });
         }
 
         function saveTodos() {
-            const todos = Array.from(todoList.children).map(item => item.textContent);
+            const todos = Array.from(todoList.children).map(item => item.textContent.split('. ')[1]);
             localStorage.setItem('todoItems', JSON.stringify(todos));
         }
     }
 
-    // Initialize the enhanced UI and features
-    function init() {
-        modifyPageHead();
-        removeUnwantedElements();
-        addSoberMinibar()
-        // Initialize widgets based on user preferences
-        if (JSON.parse(localStorage.getItem('clock') || 'true')) addCustomizableClock();
-        if (JSON.parse(localStorage.getItem('themeSwitcher') || 'true')) addThemeSwitcher();
-        if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
-        if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
+    // Initialize Dark Reader
+    const namespace = 'dark-reader-toggle';
+    const btn = document.createElement('div');
+
+    async function createDarkReaderToggle() {
+        // Create button
+        btn.id = namespace;
+        btn.textContent = '🔆';
+        Object.assign(btn.style, {
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            zIndex: '10000',
+            padding: '10px',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            fontSize: '20px',
+            textAlign: 'center',
+        });
+
+        // Add click event
+        btn.addEventListener('click', async () => {
+            if (await GM.getValue('darkMode', false)) {
+                await GM.setValue('darkMode', false);
+                disableDarkMode();
+            } else {
+                await GM.setValue('darkMode', true);
+                enableDarkMode();
+            }
+        });
+
+        // Append button
+        document.body.appendChild(btn);
+
+        // Set initial mode
+        if (await GM.getValue('darkMode', false)) {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
+        }
     }
 
-    // Apply enhanced dark theme CSS
-    const darkThemeCSS = `
-        body.dark-theme {
-            background-color: #121212 !important;
-            color: #ffffff !important;
-        }
-        .dark-theme * {
-            background-color: transparent !important;
-            color: #ffffff !important;
-            border-color: #333333 !important;
-        }
-        .dark-theme a {
-            color: #1e90ff !important;
-        }
-        .dark-theme button, .dark-theme input, .dark-theme textarea, .dark-theme select {
-            background-color: #333333 !important;
-            color: #ffffff !important;
-            border-color: #555555 !important;
-        }
-    `;
-    const styleSheet = document.createElement('style');
-    styleSheet.innerText = darkThemeCSS;
-    document.head.appendChild(styleSheet);
+    // Enable Dark Mode
+    function enableDarkMode() {
+        DarkReader.setFetchMethod(window.fetch);
+        DarkReader.enable({
+            brightness: 100,
+            contrast: 90,
+            sepia: 10,
+        });
+        btn.textContent = '🔅';
+    }
 
-    window.addEventListener('load', init);
-    window.addEventListener('resize', () => {
-        // For each element, adjust position if necessary
-        adjustElementPosition(clock, 'clockPosition');
-        adjustElementPosition(timetableContainer, 'timetablePosition');
-        adjustElementPosition(todoContainer, 'todoListPosition');
-    });
+    // Disable Dark Mode
+    function disableDarkMode() {
+        DarkReader.disable();
+        btn.textContent = '🔆';
+    }
 
+    // Adjust element position within viewport
     function adjustElementPosition(element, storageKey) {
+        if (!element) return;
         let rect = element.getBoundingClientRect();
 
         let adjustedLeft = rect.left;
@@ -765,4 +697,25 @@
             top: element.style.top
         }));
     }
+
+    // Initialize the enhanced UI and features
+    async function init() {
+        modifyPageHead();
+        removeUnwantedElements();
+        addRefreshWarning();
+        await createDarkReaderToggle();
+        addSoberMinibar();
+
+        // Initialize widgets based on user preferences
+        if (JSON.parse(localStorage.getItem('clock') || 'true')) addCustomizableClock();
+        if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
+        if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
+    }
+
+    window.addEventListener('load', init);
+    window.addEventListener('resize', () => {
+        adjustElementPosition(clock, 'clockPosition');
+        adjustElementPosition(timetableContainer, 'timetablePosition');
+        adjustElementPosition(todoContainer, 'todoListPosition');
+    });
 })();
