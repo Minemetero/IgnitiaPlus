@@ -11,6 +11,7 @@
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
@@ -350,9 +351,9 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 try {
-                    const result = eval(calculator.value);
+                    const result = math.evaluate(calculator.value);
                     calculator.value = `${result}`;
-                } catch {
+                } catch (error) {
                     calculator.value = 'Error!';
                 }
             }
@@ -728,4 +729,3 @@
         adjustElementPosition(todoContainer, 'todoListPosition');
     });
 })();
-
