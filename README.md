@@ -4,17 +4,13 @@
 
 ## 🌟 Features
 
-### 🖱️ Toolbar
-It's cool but useless, I guess...
-
 ### 🕒 Customizable Clock
 You wasted ten more minutes...
 
 ### 🎨 Theme Switcher
 Personalize your interface with:
 - **Light Theme**: Classic and clean.
-- **Dark Theme**: Ideal for nighttime studying. (Not working, Go install dark reader extension)
-- **Custom Backgrounds**: Set your own image for a personalized touch.
+- **Dark Theme**: YESSSSSSSS, it working [DarkReader](https://github.com/darkreader/darkreader)
 
 ### 📅 Class Timetable
 We actually don't need it, but... to fill up the pages.
@@ -22,21 +18,14 @@ We actually don't need it, but... to fill up the pages.
 ### 📝 Todo List
 Know what to do, make a plan for yourself, and make your life clear! Be successful; archive your goal, your dream!
 
-### Sober Minibar
+### 🎛️ Sober Minibar
 
 The Sober Minibar is a versatile toolbar that provides quick access to several tools and widgets. It includes:
 
-- **Toggle Button**: A button to show or hide the toolbar, ensuring it doesn't obstruct your view when not needed.
-- **Developer Credit**: A section displaying the developer's name, Minemetero.
+- **Developer Credit**: I need my name on it so I feel honer.
 - **Calculator Tool**: A simple calculator that evaluates expressions when you press Enter. (Big Thanks to [MathJs](https://mathjs.org))
-- **Notes Section**: A space to jot down quick notes, with automatic saving to local storage.
+- **Notes Section**: Whos knows what you going todo with it.
 - **Toggle Menu**: Allows you to enable or disable widgets like the Clock, Class Timetable, and Todo List.
-
-### Widgets
-
-- **Clock**: A customizable clock that can be moved around the screen.
-- **Class Timetable**: A widget to keep track of your class schedule.
-- **Todo List**: A simple list to manage tasks, with drag-and-drop functionality.
 
 ### ⚠️ Refresh Warning
 It's annoying, we all know; now we fixed it!
