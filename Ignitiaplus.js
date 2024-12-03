@@ -351,7 +351,21 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 try {
-                    const result = math.evaluate(calculator.value);
+                    let input = calculator.value.trim();
+                    let result;
+                    if (input.startsWith('sqrt(') && input.endsWith(')')) {
+                        const number = input.slice(5, -1);
+                        result = math.sqrt(math.evaluate(number));
+                    } else if (input.startsWith('simplify(') && input.endsWith(')')) {
+                        const expression = input.slice(10, -1);
+                        result = math.simplify(expression).toString();
+                    } else {
+                        result = math.evaluate(input);
+                    }
+                    // Round the result if it's a number
+                    if (typeof result === 'number') {
+                        result = math.round(result, 2); // Round to 2 decimal places
+                    }
                     calculator.value = `${result}`;
                 } catch (error) {
                     calculator.value = 'Error!';
