@@ -10,7 +10,7 @@ You wasted ten more minutes...
 ### 🎨 Theme Switcher
 Personalize your interface with:
 - **Light Theme**: Classic and clean.
-- **Dark Theme**: YESSSSSSSS, it working [DarkReader](https://github.com/darkreader/darkreader)
+- **Dark Theme**: YESSSSSSSS, it working! Thanks to [DarkReader](https://github.com/darkreader/darkreader) again.
 
 ### 📅 Class Timetable
 We actually don't need it, but... to fill up the pages.
