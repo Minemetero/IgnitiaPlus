@@ -708,8 +708,8 @@
             todoContainer.style.height = savedSize.height;
         } else {
             // Set default size
-            todoContainer.style.width = '300px';
-            todoContainer.style.height = '250px';
+            todoContainer.style.width = '150px';
+            todoContainer.style.height = '200px';
         }
 
         document.body.appendChild(todoContainer);
@@ -918,7 +918,7 @@
         ];
 
         const link = document.createElement('link');
-        link.href = 'https://fonts.googleapis.com/css2?family=Lobster&display=swap';
+        link.href = 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Parkinsans:wght@300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap';
         link.rel = 'stylesheet';
         document.head.appendChild(link);
 
@@ -934,13 +934,13 @@
         Object.assign(quoteContainer.style, {
             position: 'fixed',
             top: '50%',
-            right: '20px',
+            right: '200px',
             transform: 'translateY(-50%)',
             background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
             color: 'white',
             padding: '20px',
             borderRadius: '15px',
-            fontFamily: '"Lobster", cursive',
+            fontFamily: '"Merriweather"',
             fontSize: '22px',
             lineHeight: '1.5',
             zIndex: '1000',
@@ -992,4 +992,3 @@
         adjustElementPosition(todoContainer, 'todoListPosition');
     });
 })();
-
