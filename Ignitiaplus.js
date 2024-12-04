@@ -6,7 +6,7 @@
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
 // @match        *://*.ignitiaschools.com/*
-// @icon         https://github.com/Minemetero/Minemetero/blob/master/favicon.png
+// @icon         https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
