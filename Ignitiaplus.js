@@ -363,7 +363,7 @@
                     }
                     // Round the result if it's a number
                     if (typeof result === 'number') {
-                        result = math.round(result, 2); // Round to 2 decimal places
+                        result = `${math.round(result, 2)} (number is rounded)`; // Round to 2 decimal places and add reminder
                     }
                     calculator.value = `${result}`;
                 } catch (error) {
