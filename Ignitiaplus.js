@@ -4,7 +4,7 @@
 // @version      1.4.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
-// @author       Minemetero
+// @author       
 // @match        *://*.ignitiaschools.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=ignitiaschools.com
 // @grant        GM.getValue
@@ -19,23 +19,29 @@
     'use strict';
 
     // Global variables for widgets
-    let clock, timetableContainer, todoContainer;
+    let clockWidget, timetableWidget, todoWidget;
 
-    // Modify the page title and favicon
+    /**
+     * Modify the page title and favicon based on the current page.
+     */
     function modifyPageHead() {
         const titleElement = document.querySelector('title');
         if (titleElement) {
-            if (titleElement.textContent.trim() === 'Ignitia') {
+            const titleText = titleElement.textContent.trim();
+            if (titleText === 'Ignitia') {
                 titleElement.textContent = 'IgnitiaPlus';
                 injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
-            } else if (titleElement.textContent.trim() === 'switchedonuk') {
+            } else if (titleText === 'switchedonuk') {
                 titleElement.textContent = 'SwitchedOnPlus';
                 injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
             }
         }
     }
 
-    // Inject favicon into the page
+    /**
+     * Inject a favicon into the page.
+     * @param {string} href - The URL of the favicon image.
+     */
     function injectFavicon(href) {
         const existingFavicon = document.querySelector('link[rel="shortcut icon"]');
         if (existingFavicon) {
@@ -49,7 +55,9 @@
         document.head.appendChild(faviconLink);
     }
 
-    // Remove unwanted elements from the page
+    /**
+     * Remove unwanted elements from the page, such as sign-out button and footer.
+     */
     function removeUnwantedElements() {
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
@@ -66,10 +74,13 @@
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
-    // Add a customizable clock to the page
+    /**
+     * Add a customizable clock widget to the page.
+     */
     function addCustomizableClock() {
-        clock = document.createElement('div');
-        Object.assign(clock.style, {
+        clockWidget = document.createElement('div');
+        clockWidget.id = 'clockWidget';
+        Object.assign(clockWidget.style, {
             position: 'fixed',
             bottom: '10px',
             right: '10px',
@@ -86,24 +97,26 @@
             maxHeight: '90vh',
             overflow: 'hidden',
         });
-        clock.id = 'clock';
 
+        // Function to update the clock time every second
         function updateClock() {
             const now = new Date();
             const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const seconds = now.getSeconds().toString().padStart(2, '0');
-            clock.textContent = `${hours}:${minutes}:${seconds}`;
+            clockWidget.textContent = `${hours}:${minutes}:${seconds}`;
         }
 
+        // Variables for dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
 
-        clock.addEventListener('mousedown', (e) => {
+        // Event listeners for dragging
+        clockWidget.addEventListener('mousedown', (e) => {
             if (e.target === resizeHandle) return; // Ignore dragging when resizing
             isDragging = true;
-            offsetX = e.clientX - clock.offsetLeft;
-            offsetY = e.clientY - clock.offsetTop;
+            offsetX = e.clientX - clockWidget.offsetLeft;
+            offsetY = e.clientY - clockWidget.offsetTop;
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -112,23 +125,23 @@
                 let newY = e.clientY - offsetY;
 
                 // Constrain within viewport
-                newX = Math.max(0, Math.min(newX, window.innerWidth - clock.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - clock.offsetHeight));
+                newX = Math.max(0, Math.min(newX, window.innerWidth - clockWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - clockWidget.offsetHeight));
 
-                clock.style.left = `${newX}px`;
-                clock.style.top = `${newY}px`;
-                clock.style.bottom = 'auto';
-                clock.style.right = 'auto';
+                clockWidget.style.left = `${newX}px`;
+                clockWidget.style.top = `${newY}px`;
+                clockWidget.style.bottom = 'auto';
+                clockWidget.style.right = 'auto';
             } else if (isResizing) {
-                const newWidth = e.clientX - clock.getBoundingClientRect().left;
-                const newHeight = e.clientY - clock.getBoundingClientRect().top;
-                clock.style.width = `${newWidth}px`;
-                clock.style.height = `${newHeight}px`;
+                const newWidth = e.clientX - clockWidget.getBoundingClientRect().left;
+                const newHeight = e.clientY - clockWidget.getBoundingClientRect().top;
+                clockWidget.style.width = `${newWidth}px`;
+                clockWidget.style.height = `${newHeight}px`;
 
-                // Save size
-                localStorage.setItem('clockSize', JSON.stringify({
-                    width: clock.style.width,
-                    height: clock.style.height
+                // Save size to localStorage
+                localStorage.setItem('clockWidgetSize', JSON.stringify({
+                    width: clockWidget.style.width,
+                    height: clockWidget.style.height
                 }));
             }
         });
@@ -136,9 +149,10 @@
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
-                localStorage.setItem('clockPosition', JSON.stringify({
-                    left: clock.style.left,
-                    top: clock.style.top
+                // Save position to localStorage
+                localStorage.setItem('clockWidgetPosition', JSON.stringify({
+                    left: clockWidget.style.left,
+                    top: clockWidget.style.top
                 }));
             }
             if (isResizing) {
@@ -146,30 +160,33 @@
             }
         });
 
-        const savedPosition = JSON.parse(localStorage.getItem('clockPosition'));
+        // Load saved position from localStorage
+        const savedPosition = JSON.parse(localStorage.getItem('clockWidgetPosition'));
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
 
             // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - clock.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - clock.offsetHeight));
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - clockWidget.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - clockWidget.offsetHeight));
 
-            clock.style.left = `${savedLeft}px`;
-            clock.style.top = `${savedTop}px`;
-            clock.style.bottom = 'auto';
-            clock.style.right = 'auto';
+            clockWidget.style.left = `${savedLeft}px`;
+            clockWidget.style.top = `${savedTop}px`;
+            clockWidget.style.bottom = 'auto';
+            clockWidget.style.right = 'auto';
         }
 
-        const savedSize = JSON.parse(localStorage.getItem('clockSize'));
+        // Load saved size from localStorage
+        const savedSize = JSON.parse(localStorage.getItem('clockWidgetSize'));
         if (savedSize) {
-            clock.style.width = savedSize.width;
-            clock.style.height = savedSize.height;
+            clockWidget.style.width = savedSize.width;
+            clockWidget.style.height = savedSize.height;
         }
 
+        // Initialize clock and start updating every second
         updateClock();
         setInterval(updateClock, 1000);
-        document.body.appendChild(clock);
+        document.body.appendChild(clockWidget);
 
         // Resizing functionality
         const resizeHandle = document.createElement('div');
@@ -182,7 +199,7 @@
             right: '0',
             cursor: 'nwse-resize'
         });
-        clock.appendChild(resizeHandle);
+        clockWidget.appendChild(resizeHandle);
 
         let isResizing = false;
 
@@ -193,11 +210,13 @@
         });
     }
 
-
-    // Add class timetable widget
+    /**
+     * Add a class timetable widget to the page.
+     */
     function addClassTimetable() {
-        timetableContainer = document.createElement('div');
-        Object.assign(timetableContainer.style, {
+        timetableWidget = document.createElement('div');
+        timetableWidget.id = 'timetableWidget';
+        Object.assign(timetableWidget.style, {
             position: 'fixed',
             bottom: '60px',
             left: '10px',
@@ -214,13 +233,14 @@
             cursor: 'move',
             userSelect: 'none'
         });
-        timetableContainer.id = 'timetableContainer';
 
+        // Header for the timetable
         const timetableHeader = document.createElement('div');
         timetableHeader.textContent = '📅 Class Timetable';
         timetableHeader.style.fontWeight = 'bold';
-        timetableContainer.appendChild(timetableHeader);
+        timetableWidget.appendChild(timetableHeader);
 
+        // Textarea for the timetable content
         const timetableBody = document.createElement('textarea');
         Object.assign(timetableBody.style, {
             width: '100%',
@@ -237,39 +257,41 @@
         timetableBody.addEventListener('input', () => {
             localStorage.setItem('timetable', timetableBody.value);
         });
-        timetableContainer.appendChild(timetableBody);
+        timetableWidget.appendChild(timetableBody);
 
-        document.body.appendChild(timetableContainer);
+        document.body.appendChild(timetableWidget);
 
-        const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
+        // Load saved position and size from localStorage
+        const savedPosition = JSON.parse(localStorage.getItem('timetableWidgetPosition'));
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
 
             // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - timetableContainer.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - timetableContainer.offsetHeight));
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - timetableWidget.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - timetableWidget.offsetHeight));
 
-            timetableContainer.style.left = `${savedLeft}px`;
-            timetableContainer.style.top = `${savedTop}px`;
-            timetableContainer.style.bottom = 'auto';
-            timetableContainer.style.right = 'auto';
+            timetableWidget.style.left = `${savedLeft}px`;
+            timetableWidget.style.top = `${savedTop}px`;
+            timetableWidget.style.bottom = 'auto';
+            timetableWidget.style.right = 'auto';
         }
 
-        const savedSize = JSON.parse(localStorage.getItem('timetableSize'));
+        const savedSize = JSON.parse(localStorage.getItem('timetableWidgetSize'));
         if (savedSize) {
-            timetableContainer.style.width = savedSize.width;
-            timetableContainer.style.height = savedSize.height;
+            timetableWidget.style.width = savedSize.width;
+            timetableWidget.style.height = savedSize.height;
         }
 
+        // Variables for dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
 
         timetableHeader.addEventListener('mousedown', (e) => {
             if (e.target === resizeHandle) return; // Ignore dragging when resizing
             isDragging = true;
-            offsetX = e.clientX - timetableContainer.offsetLeft;
-            offsetY = e.clientY - timetableContainer.offsetTop;
+            offsetX = e.clientX - timetableWidget.offsetLeft;
+            offsetY = e.clientY - timetableWidget.offsetTop;
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -278,25 +300,25 @@
                 let newY = e.clientY - offsetY;
 
                 // Constrain within viewport
-                newX = Math.max(0, Math.min(newX, window.innerWidth - timetableContainer.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - timetableContainer.offsetHeight));
+                newX = Math.max(0, Math.min(newX, window.innerWidth - timetableWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - timetableWidget.offsetHeight));
 
-                timetableContainer.style.left = `${newX}px`;
-                timetableContainer.style.top = `${newY}px`;
-                timetableContainer.style.bottom = 'auto';
-                timetableContainer.style.right = 'auto';
+                timetableWidget.style.left = `${newX}px`;
+                timetableWidget.style.top = `${newY}px`;
+                timetableWidget.style.bottom = 'auto';
+                timetableWidget.style.right = 'auto';
             } else if (isResizing) {
-                const newWidth = e.clientX - timetableContainer.getBoundingClientRect().left;
-                const newHeight = e.clientY - timetableContainer.getBoundingClientRect().top;
-                timetableContainer.style.width = `${newWidth}px`;
-                timetableContainer.style.height = `${newHeight}px`;
+                const newWidth = e.clientX - timetableWidget.getBoundingClientRect().left;
+                const newHeight = e.clientY - timetableWidget.getBoundingClientRect().top;
+                timetableWidget.style.width = `${newWidth}px`;
+                timetableWidget.style.height = `${newHeight}px`;
                 // Adjust textarea height
                 timetableBody.style.height = 'calc(100% - 40px)';
 
-                // Save size
-                localStorage.setItem('timetableSize', JSON.stringify({
-                    width: timetableContainer.style.width,
-                    height: timetableContainer.style.height
+                // Save size to localStorage
+                localStorage.setItem('timetableWidgetSize', JSON.stringify({
+                    width: timetableWidget.style.width,
+                    height: timetableWidget.style.height
                 }));
             }
         });
@@ -304,9 +326,10 @@
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
-                localStorage.setItem('timetablePosition', JSON.stringify({
-                    left: timetableContainer.style.left,
-                    top: timetableContainer.style.top
+                // Save position to localStorage
+                localStorage.setItem('timetableWidgetPosition', JSON.stringify({
+                    left: timetableWidget.style.left,
+                    top: timetableWidget.style.top
                 }));
             }
             if (isResizing) {
@@ -325,19 +348,20 @@
             right: '5px',
             cursor: 'nwse-resize'
         });
-        timetableContainer.appendChild(resizeHandle);
+        timetableWidget.appendChild(resizeHandle);
 
         let isResizing = false;
 
         resizeHandle.addEventListener('mousedown', (e) => {
             isResizing = true;
             e.preventDefault();
-            e.stopPropagation(); // To prevent triggering the dragging
+            e.stopPropagation();
         });
     }
 
-
-    // Add refresh warning to prevent accidental navigation
+    /**
+     * Add a refresh warning to prevent accidental navigation away from the page.
+     */
     function addRefreshWarning() {
         let warningActive = false;
 
@@ -356,9 +380,12 @@
         });
     }
 
-    // Add sober minibar with tools
+    /**
+     * Add a sober minibar with tools such as calculator and notes.
+     */
     function addSoberMinibar() {
         const toolbar = document.createElement('div');
+        toolbar.id = 'minimalist-toolbar-popup';
         Object.assign(toolbar.style, {
             position: 'fixed',
             top: '50px',
@@ -377,7 +404,6 @@
             flexDirection: 'column',
             alignItems: 'center',
         });
-        toolbar.id = 'minimalist-toolbar-popup';
 
         // Toggle button to show/hide the toolbar
         const toggleButton = document.createElement('div');
@@ -401,11 +427,12 @@
         });
         toggleButton.textContent = '☰';
 
+        // Event listener to toggle the toolbar display
         toggleButton.addEventListener('click', () => {
             toolbar.style.display = toolbar.style.display === 'none' ? 'flex' : 'none';
         });
 
-        // Add Developer Name
+        // Developer name display
         const developerName = document.createElement('div');
         developerName.textContent = 'By Minemetero';
         Object.assign(developerName.style, {
@@ -416,7 +443,7 @@
         });
         toolbar.appendChild(developerName);
 
-        // Calculator Tool
+        // Calculator tool
         const calculator = document.createElement('textarea');
         calculator.id = 'minimalist-calculator';
         calculator.placeholder = 'Calculator (press Enter to evaluate)';
@@ -461,7 +488,7 @@
         });
         toolbar.appendChild(calculator);
 
-        // Notes Section
+        // Notes section
         const notes = document.createElement('textarea');
         notes.id = 'minimalist-notes';
         notes.placeholder = 'Your Notes...';
@@ -484,7 +511,7 @@
         });
         toolbar.appendChild(notes);
 
-        // Add Toggle Menu within Sober Minibar
+        // Widget toggle menu within the minibar
         const toggleMenu = document.createElement('div');
         Object.assign(toggleMenu.style, {
             backgroundColor: 'rgba(0, 0, 0, 0.9)',
@@ -500,9 +527,9 @@
         });
 
         const widgets = [
-            { name: 'Clock', id: 'clock', initFunction: addCustomizableClock },
-            { name: 'Class Timetable', id: 'classTimetable', initFunction: addClassTimetable },
-            { name: 'Todo List', id: 'todoList', initFunction: addTodoList }
+            { name: 'Clock', id: 'clockWidget', initFunction: addCustomizableClock },
+            { name: 'Class Timetable', id: 'timetableWidget', initFunction: addClassTimetable },
+            { name: 'Todo List', id: 'todoWidget', initFunction: addTodoList }
         ];
 
         widgets.forEach(widget => {
@@ -541,10 +568,13 @@
         document.body.appendChild(toolbar);
     }
 
-    // Add todo list widget
+    /**
+     * Add a todo list widget to the page.
+     */
     function addTodoList() {
-        todoContainer = document.createElement('div');
-        Object.assign(todoContainer.style, {
+        todoWidget = document.createElement('div');
+        todoWidget.id = 'todoWidget';
+        Object.assign(todoWidget.style, {
             position: 'fixed',
             bottom: '0px',
             left: '10px',
@@ -557,20 +587,19 @@
             zIndex: '1000',
             maxWidth: '90vw',
             maxHeight: '90vh',
-            overflow: 'auto', // Allow scrolling if content overflows
+            overflow: 'auto',
             cursor: 'default',
             userSelect: 'none'
         });
-        todoContainer.id = 'todoContainer';
 
         const todoHeader = document.createElement('div');
         todoHeader.textContent = '📝 Todo List';
         Object.assign(todoHeader.style, {
             fontWeight: 'bold',
-            cursor: 'move', // Show move cursor over header
+            cursor: 'move',
             marginBottom: '5px',
         });
-        todoContainer.appendChild(todoHeader);
+        todoWidget.appendChild(todoHeader);
 
         const todoInput = document.createElement('input');
         todoInput.placeholder = 'Add a new task...';
@@ -582,7 +611,7 @@
             outline: 'none',
             fontSize: '14px',
         });
-        todoContainer.appendChild(todoInput);
+        todoWidget.appendChild(todoInput);
 
         const todoList = document.createElement('ul');
         Object.assign(todoList.style, {
@@ -590,12 +619,13 @@
             padding: '0',
             marginTop: '10px',
         });
-        todoContainer.appendChild(todoList);
+        todoWidget.appendChild(todoList);
 
         // Load saved todo items
         const savedTodos = JSON.parse(localStorage.getItem('todoItems')) || [];
         savedTodos.forEach(todo => addTodoItem(todo));
 
+        // Event listener to add todo items
         todoInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && todoInput.value.trim() !== '') {
                 addTodoItem(todoInput.value.trim());
@@ -603,15 +633,15 @@
             }
         });
 
-        // Dragging functionality
+        // Variables for dragging functionality
         let isDragging = false;
         let offsetX, offsetY;
 
         todoHeader.addEventListener('mousedown', (e) => {
-            if (isResizing) return; // Ignore dragging when resizing
+            if (isResizing) return;
             isDragging = true;
-            offsetX = e.clientX - todoContainer.offsetLeft;
-            offsetY = e.clientY - todoContainer.offsetTop;
+            offsetX = e.clientX - todoWidget.offsetLeft;
+            offsetY = e.clientY - todoWidget.offsetTop;
         });
 
         document.addEventListener('mousemove', (e) => {
@@ -620,11 +650,11 @@
                 let newY = e.clientY - offsetY;
 
                 // Constrain within viewport
-                newX = Math.max(0, Math.min(newX, window.innerWidth - todoContainer.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - todoContainer.offsetHeight));
+                newX = Math.max(0, Math.min(newX, window.innerWidth - todoWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - todoWidget.offsetHeight));
 
-                todoContainer.style.left = `${newX}px`;
-                todoContainer.style.top = `${newY}px`;
+                todoWidget.style.left = `${newX}px`;
+                todoWidget.style.top = `${newY}px`;
             } else if (isResizing) {
                 const deltaX = e.clientX - startX;
                 const deltaY = e.clientY - startY;
@@ -633,13 +663,13 @@
                 const newHeight = startHeight + deltaY;
 
                 // Set minimum width and height to 50px
-                todoContainer.style.width = `${Math.max(newWidth, 50)}px`;
-                todoContainer.style.height = `${Math.max(newHeight, 50)}px`;
+                todoWidget.style.width = `${Math.max(newWidth, 50)}px`;
+                todoWidget.style.height = `${Math.max(newHeight, 50)}px`;
 
-                // Save size
-                localStorage.setItem('todoListSize', JSON.stringify({
-                    width: todoContainer.style.width,
-                    height: todoContainer.style.height
+                // Save size to localStorage
+                localStorage.setItem('todoWidgetSize', JSON.stringify({
+                    width: todoWidget.style.width,
+                    height: todoWidget.style.height
                 }));
             }
         });
@@ -647,9 +677,10 @@
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
-                localStorage.setItem('todoListPosition', JSON.stringify({
-                    left: todoContainer.style.left,
-                    top: todoContainer.style.top
+                // Save position to localStorage
+                localStorage.setItem('todoWidgetPosition', JSON.stringify({
+                    left: todoWidget.style.left,
+                    top: todoWidget.style.top
                 }));
             }
             if (isResizing) {
@@ -660,17 +691,17 @@
         // Resizing functionality
         const resizeHandle = document.createElement('div');
         Object.assign(resizeHandle.style, {
-            width: '15px', // Increase size for easier interaction
+            width: '15px',
             height: '15px',
             backgroundColor: 'rgba(255, 255, 255, 0.7)',
             position: 'absolute',
             bottom: '0',
             right: '0',
             cursor: 'nwse-resize',
-            zIndex: '1001', // Ensure it's on top
+            zIndex: '1001',
             borderBottomRightRadius: '5px'
         });
-        todoContainer.appendChild(resizeHandle);
+        todoWidget.appendChild(resizeHandle);
 
         let isResizing = false;
         let startX, startY, startWidth, startHeight;
@@ -678,42 +709,46 @@
         resizeHandle.addEventListener('mousedown', (e) => {
             isResizing = true;
             e.preventDefault();
-            e.stopPropagation(); // Prevent triggering dragging
+            e.stopPropagation();
             startX = e.clientX;
             startY = e.clientY;
-            startWidth = parseInt(document.defaultView.getComputedStyle(todoContainer).width, 10);
-            startHeight = parseInt(document.defaultView.getComputedStyle(todoContainer).height, 10);
+            startWidth = parseInt(document.defaultView.getComputedStyle(todoWidget).width, 10);
+            startHeight = parseInt(document.defaultView.getComputedStyle(todoWidget).height, 10);
         });
 
-        // Load saved position
-        const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
+        // Load saved position from localStorage
+        const savedPosition = JSON.parse(localStorage.getItem('todoWidgetPosition'));
         if (savedPosition) {
             let savedLeft = parseInt(savedPosition.left, 10);
             let savedTop = parseInt(savedPosition.top, 10);
 
             // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoWidget.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoWidget.offsetHeight));
 
-            todoContainer.style.left = `${savedLeft}px`;
-            todoContainer.style.top = `${savedTop}px`;
-            todoContainer.style.bottom = 'auto';
-            todoContainer.style.right = 'auto';
+            todoWidget.style.left = `${savedLeft}px`;
+            todoWidget.style.top = `${savedTop}px`;
+            todoWidget.style.bottom = 'auto';
+            todoWidget.style.right = 'auto';
         }
 
-        // Load saved size
-        const savedSize = JSON.parse(localStorage.getItem('todoListSize'));
+        // Load saved size from localStorage
+        const savedSize = JSON.parse(localStorage.getItem('todoWidgetSize'));
         if (savedSize) {
-            todoContainer.style.width = savedSize.width;
-            todoContainer.style.height = savedSize.height;
+            todoWidget.style.width = savedSize.width;
+            todoWidget.style.height = savedSize.height;
         } else {
             // Set default size
-            todoContainer.style.width = '150px';
-            todoContainer.style.height = '200px';
+            todoWidget.style.width = '150px';
+            todoWidget.style.height = '200px';
         }
 
-        document.body.appendChild(todoContainer);
+        document.body.appendChild(todoWidget);
 
+        /**
+         * Add a todo item to the list.
+         * @param {string} todo - The todo item text.
+         */
         function addTodoItem(todo) {
             const todoItem = document.createElement('li');
             const currentIndex = todoList.children.length + 1;
@@ -725,6 +760,7 @@
                 borderRadius: '3px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
             });
+            // Event listener to remove todo item on click
             todoItem.addEventListener('click', () => {
                 todoItem.remove();
                 saveTodos();
@@ -734,6 +770,9 @@
             saveTodos();
         }
 
+        /**
+         * Update the numbering of the todo list items.
+         */
         function updateTodoList() {
             // Update the numbering of the todo items
             Array.from(todoList.children).forEach((item, index) => {
@@ -741,18 +780,22 @@
             });
         }
 
+        /**
+         * Save the todo items to localStorage.
+         */
         function saveTodos() {
             const todos = Array.from(todoList.children).map(item => item.textContent.split('. ')[1]);
             localStorage.setItem('todoItems', JSON.stringify(todos));
         }
     }
 
-    // Initialize Dark Reader
-    const namespace = 'dark-reader-toggle';
-    const btn = document.createElement('div');
-
+    /**
+     * Initialize Dark Reader and create a toggle button for dark mode.
+     */
     async function createDarkReaderToggle() {
-        // Create button
+        const namespace = 'dark-reader-toggle';
+        const btn = document.createElement('div');
+        // Create dark mode toggle button
         btn.id = namespace;
         btn.textContent = '🔆';
         Object.assign(btn.style, {
@@ -769,7 +812,7 @@
             textAlign: 'center',
         });
 
-        // Add click event
+        // Add click event to toggle dark mode
         btn.addEventListener('click', async () => {
             if (await GM.getValue('darkMode', false)) {
                 await GM.setValue('darkMode', false);
@@ -780,10 +823,10 @@
             }
         });
 
-        // Append button
+        // Append button to document
         document.body.appendChild(btn);
 
-        // Set initial mode
+        // Set initial mode based on stored preference
         if (await GM.getValue('darkMode', false)) {
             enableDarkMode();
         } else {
@@ -791,7 +834,9 @@
         }
     }
 
-    // Enable Dark Mode
+    /**
+     * Enable dark mode using Dark Reader.
+     */
     function enableDarkMode() {
         DarkReader.setFetchMethod(window.fetch);
         DarkReader.enable({
@@ -799,7 +844,8 @@
             contrast: 105,
             sepia: 0,
         });
-        btn.textContent = '🔅';
+        const btn = document.getElementById('dark-reader-toggle');
+        if (btn) btn.textContent = '🔅';
 
         const logoElement = document.querySelector('#gl_logo img');
         if (logoElement) {
@@ -807,10 +853,13 @@
         }
     }
 
-    // Disable Dark Mode
+    /**
+     * Disable dark mode.
+     */
     function disableDarkMode() {
         DarkReader.disable();
-        btn.textContent = '🔆';
+        const btn = document.getElementById('dark-reader-toggle');
+        if (btn) btn.textContent = '🔆';
 
         const logoElement = document.querySelector('#gl_logo img');
         if (logoElement) {
@@ -818,39 +867,9 @@
         }
     }
 
-    // Adjust element position within viewport
-    function adjustElementPosition(element, storageKey) {
-        if (!element) return;
-        let rect = element.getBoundingClientRect();
-
-        let adjustedLeft = rect.left;
-        let adjustedTop = rect.top;
-
-        if (rect.right > window.innerWidth) {
-            adjustedLeft = window.innerWidth - rect.width;
-        }
-        if (rect.bottom > window.innerHeight) {
-            adjustedTop = window.innerHeight - rect.height;
-        }
-        if (rect.left < 0) {
-            adjustedLeft = 0;
-        }
-        if (rect.top < 0) {
-            adjustedTop = 0;
-        }
-
-        element.style.left = `${adjustedLeft}px`;
-        element.style.top = `${adjustedTop}px`;
-
-        // Save adjusted position
-        localStorage.setItem(storageKey, JSON.stringify({
-            left: element.style.left,
-            top: element.style.top
-        }));
-    }
-
-
-    //Add Inspirational Quote of the Day function
+    /**
+     * Add an inspirational quote of the day to the login page.
+     */
     function addInspirationalQuote() {
         const quotes = [
             "The best way to predict your future is to create it. - Abraham Lincoln",
@@ -917,19 +936,18 @@
             "Believe in the power of your dreams. - Anonymous"
         ];
 
+        // Load Google Fonts
         const link = document.createElement('link');
-        link.href = 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Parkinsans:wght@300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap';
+        link.href = 'https://fonts.googleapis.com/css2?family=Merriweather&display=swap';
         link.rel = 'stylesheet';
         document.head.appendChild(link);
 
-        // Get today's date
+        // Get today's date and select a quote
         const today = new Date();
         const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-
-        // Select a quote based on dayOfYear
         const quote = quotes[dayOfYear % quotes.length];
 
-        // Create a container div
+        // Create quote container
         const quoteContainer = document.createElement('div');
         Object.assign(quoteContainer.style, {
             position: 'fixed',
@@ -940,7 +958,7 @@
             color: 'white',
             padding: '20px',
             borderRadius: '15px',
-            fontFamily: '"Merriweather"',
+            fontFamily: '"Merriweather", serif',
             fontSize: '22px',
             lineHeight: '1.5',
             zIndex: '1000',
@@ -957,6 +975,7 @@
         // Append to body
         document.body.appendChild(quoteContainer);
 
+        // Add fadeIn animation keyframes
         const styleSheet = document.styleSheets[0];
         styleSheet.insertRule(`
             @keyframes fadeIn {
@@ -967,12 +986,50 @@
         `, styleSheet.cssRules.length);
     }
 
-    // Initialize the enhanced UI and features
+    /**
+    * Adjust the position of an element to ensure it's within the viewport.
+    * @param {HTMLElement} element - The element to adjust.
+    * @param {string} storageKey - The key to store the position in localStorage.
+    */
+    function adjustElementPosition(element, storageKey) {
+        if (!element) return;
+        let rect = element.getBoundingClientRect();
+
+        let adjustedLeft = rect.left;
+        let adjustedTop = rect.top;
+
+        if (rect.right > window.innerWidth) {
+            adjustedLeft = window.innerWidth - rect.width;
+        }
+        if (rect.bottom > window.innerHeight) {
+            adjustedTop = window.innerHeight - rect.height;
+        }
+        if (rect.left < 0) {
+            adjustedLeft = 0;
+        }
+        if (rect.top < 0) {
+            adjustedTop = 0;
+        }
+
+        element.style.left = `${adjustedLeft}px`;
+        element.style.top = `${adjustedTop}px`;
+
+        // Save adjusted position to localStorage
+        localStorage.setItem(storageKey, JSON.stringify({
+            left: element.style.left,
+            top: element.style.top
+        }));
+    }
+
+    /**
+     * Initialize the enhanced UI and features.
+     */
     async function init() {
         if (window.location.pathname === '/owsoo/login/auth') {
+            // On login page, add inspirational quote
             addInspirationalQuote();
         } else {
-            // We are on other pages
+            // On other pages, initialize enhancements
             modifyPageHead();
             removeUnwantedElements();
             addRefreshWarning();
@@ -980,15 +1037,17 @@
             addSoberMinibar();
 
             // Initialize widgets based on user preferences
-            if (JSON.parse(localStorage.getItem('clock') || 'true')) addCustomizableClock();
-            if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
-            if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
+            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
+            if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
+            if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
         }
     }
+
+    // Event listeners for initialization and resizing
     window.addEventListener('load', init);
     window.addEventListener('resize', () => {
-        adjustElementPosition(clock, 'clockPosition');
-        adjustElementPosition(timetableContainer, 'timetablePosition');
-        adjustElementPosition(todoContainer, 'todoListPosition');
+        adjustElementPosition(clockWidget, 'clockWidgetPosition');
+        adjustElementPosition(timetableWidget, 'timetableWidgetPosition');
+        adjustElementPosition(todoWidget, 'todoWidgetPosition');
     });
 })();
