@@ -100,6 +100,7 @@
         let offsetX, offsetY;
 
         clock.addEventListener('mousedown', (e) => {
+            if (e.target === resizeHandle) return; // Ignore dragging when resizing
             isDragging = true;
             offsetX = e.clientX - clock.offsetLeft;
             offsetY = e.clientY - clock.offsetTop;
@@ -118,6 +119,17 @@
                 clock.style.top = `${newY}px`;
                 clock.style.bottom = 'auto';
                 clock.style.right = 'auto';
+            } else if (isResizing) {
+                const newWidth = e.clientX - clock.getBoundingClientRect().left;
+                const newHeight = e.clientY - clock.getBoundingClientRect().top;
+                clock.style.width = `${newWidth}px`;
+                clock.style.height = `${newHeight}px`;
+
+                // Save size
+                localStorage.setItem('clockSize', JSON.stringify({
+                    width: clock.style.width,
+                    height: clock.style.height
+                }));
             }
         });
 
@@ -128,6 +140,9 @@
                     left: clock.style.left,
                     top: clock.style.top
                 }));
+            }
+            if (isResizing) {
+                isResizing = false;
             }
         });
 
@@ -146,10 +161,38 @@
             clock.style.right = 'auto';
         }
 
+        const savedSize = JSON.parse(localStorage.getItem('clockSize'));
+        if (savedSize) {
+            clock.style.width = savedSize.width;
+            clock.style.height = savedSize.height;
+        }
+
         updateClock();
         setInterval(updateClock, 1000);
         document.body.appendChild(clock);
+
+        // Resizing functionality
+        const resizeHandle = document.createElement('div');
+        Object.assign(resizeHandle.style, {
+            width: '10px',
+            height: '10px',
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            position: 'absolute',
+            bottom: '0',
+            right: '0',
+            cursor: 'nwse-resize'
+        });
+        clock.appendChild(resizeHandle);
+
+        let isResizing = false;
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            e.preventDefault();
+            e.stopPropagation(); // To prevent triggering the dragging
+        });
     }
+
 
     // Add class timetable widget
     function addClassTimetable() {
@@ -165,8 +208,8 @@
             fontFamily: 'Arial, sans-serif',
             fontSize: '14px',
             zIndex: '1000',
-            maxWidth: '30vw',
-            maxHeight: '40vh',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
             overflowY: 'auto',
             cursor: 'move',
             userSelect: 'none'
@@ -181,7 +224,7 @@
         const timetableBody = document.createElement('textarea');
         Object.assign(timetableBody.style, {
             width: '100%',
-            height: '150px',
+            height: 'calc(100% - 40px)', // Adjust height to fill container
             backgroundColor: 'transparent',
             color: 'white',
             border: 'none',
@@ -213,10 +256,17 @@
             timetableContainer.style.right = 'auto';
         }
 
+        const savedSize = JSON.parse(localStorage.getItem('timetableSize'));
+        if (savedSize) {
+            timetableContainer.style.width = savedSize.width;
+            timetableContainer.style.height = savedSize.height;
+        }
+
         let isDragging = false;
         let offsetX, offsetY;
 
         timetableHeader.addEventListener('mousedown', (e) => {
+            if (e.target === resizeHandle) return; // Ignore dragging when resizing
             isDragging = true;
             offsetX = e.clientX - timetableContainer.offsetLeft;
             offsetY = e.clientY - timetableContainer.offsetTop;
@@ -235,6 +285,19 @@
                 timetableContainer.style.top = `${newY}px`;
                 timetableContainer.style.bottom = 'auto';
                 timetableContainer.style.right = 'auto';
+            } else if (isResizing) {
+                const newWidth = e.clientX - timetableContainer.getBoundingClientRect().left;
+                const newHeight = e.clientY - timetableContainer.getBoundingClientRect().top;
+                timetableContainer.style.width = `${newWidth}px`;
+                timetableContainer.style.height = `${newHeight}px`;
+                // Adjust textarea height
+                timetableBody.style.height = 'calc(100% - 40px)';
+
+                // Save size
+                localStorage.setItem('timetableSize', JSON.stringify({
+                    width: timetableContainer.style.width,
+                    height: timetableContainer.style.height
+                }));
             }
         });
 
@@ -246,8 +309,33 @@
                     top: timetableContainer.style.top
                 }));
             }
+            if (isResizing) {
+                isResizing = false;
+            }
+        });
+
+        // Resizing functionality
+        const resizeHandle = document.createElement('div');
+        Object.assign(resizeHandle.style, {
+            width: '10px',
+            height: '10px',
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            position: 'absolute',
+            bottom: '5px',
+            right: '5px',
+            cursor: 'nwse-resize'
+        });
+        timetableContainer.appendChild(resizeHandle);
+
+        let isResizing = false;
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            e.preventDefault();
+            e.stopPropagation(); // To prevent triggering the dragging
         });
     }
+
 
     // Add refresh warning to prevent accidental navigation
     function addRefreshWarning() {
@@ -467,31 +555,21 @@
             fontFamily: 'Arial, sans-serif',
             fontSize: '14px',
             zIndex: '1000',
-            maxWidth: '250px',
-            maxHeight: '200px',
-            overflowY: 'auto',
-            cursor: 'move',
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            overflow: 'auto', // Allow scrolling if content overflows
+            cursor: 'default',
             userSelect: 'none'
         });
         todoContainer.id = 'todoContainer';
 
-        // Load saved position
-        const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
-        if (savedPosition) {
-            let savedLeft = parseInt(savedPosition.left, 10);
-            let savedTop = parseInt(savedPosition.top, 10);
-
-            // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
-
-            todoContainer.style.left = `${savedLeft}px`;
-            todoContainer.style.top = `${savedTop}px`;
-        }
-
         const todoHeader = document.createElement('div');
         todoHeader.textContent = '📝 Todo List';
-        todoHeader.style.fontWeight = 'bold';
+        Object.assign(todoHeader.style, {
+            fontWeight: 'bold',
+            cursor: 'move', // Show move cursor over header
+            marginBottom: '5px',
+        });
         todoContainer.appendChild(todoHeader);
 
         const todoInput = document.createElement('input');
@@ -499,17 +577,19 @@
         Object.assign(todoInput.style, {
             width: '90%',
             padding: '5px',
-            marginTop: '5px',
             borderRadius: '3px',
             border: '1px solid #ddd',
             outline: 'none',
-            fontSize: '14px'
+            fontSize: '14px',
         });
         todoContainer.appendChild(todoInput);
 
         const todoList = document.createElement('ul');
-        todoList.style.listStyleType = 'none';
-        todoList.style.padding = '0';
+        Object.assign(todoList.style, {
+            listStyleType: 'none',
+            padding: '0',
+            marginTop: '10px',
+        });
         todoContainer.appendChild(todoList);
 
         // Load saved todo items
@@ -518,7 +598,7 @@
 
         todoInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && todoInput.value.trim() !== '') {
-                addTodoItem(todoInput.value);
+                addTodoItem(todoInput.value.trim());
                 todoInput.value = '';
             }
         });
@@ -528,6 +608,7 @@
         let offsetX, offsetY;
 
         todoHeader.addEventListener('mousedown', (e) => {
+            if (isResizing) return; // Ignore dragging when resizing
             isDragging = true;
             offsetX = e.clientX - todoContainer.offsetLeft;
             offsetY = e.clientY - todoContainer.offsetTop;
@@ -544,6 +625,22 @@
 
                 todoContainer.style.left = `${newX}px`;
                 todoContainer.style.top = `${newY}px`;
+            } else if (isResizing) {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+
+                const newWidth = startWidth + deltaX;
+                const newHeight = startHeight + deltaY;
+
+                // Set minimum width and height to 50px
+                todoContainer.style.width = `${Math.max(newWidth, 50)}px`;
+                todoContainer.style.height = `${Math.max(newHeight, 50)}px`;
+
+                // Save size
+                localStorage.setItem('todoListSize', JSON.stringify({
+                    width: todoContainer.style.width,
+                    height: todoContainer.style.height
+                }));
             }
         });
 
@@ -555,40 +652,65 @@
                     top: todoContainer.style.top
                 }));
             }
+            if (isResizing) {
+                isResizing = false;
+            }
         });
 
         // Resizing functionality
         const resizeHandle = document.createElement('div');
         Object.assign(resizeHandle.style, {
-            width: '10px',
-            height: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            width: '15px', // Increase size for easier interaction
+            height: '15px',
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
             position: 'absolute',
-            bottom: '5px',
-            right: '5px',
-            cursor: 'nwse-resize'
+            bottom: '0',
+            right: '0',
+            cursor: 'nwse-resize',
+            zIndex: '1001', // Ensure it's on top
+            borderBottomRightRadius: '5px'
         });
         todoContainer.appendChild(resizeHandle);
 
         let isResizing = false;
+        let startX, startY, startWidth, startHeight;
 
         resizeHandle.addEventListener('mousedown', (e) => {
             isResizing = true;
             e.preventDefault();
+            e.stopPropagation(); // Prevent triggering dragging
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = parseInt(document.defaultView.getComputedStyle(todoContainer).width, 10);
+            startHeight = parseInt(document.defaultView.getComputedStyle(todoContainer).height, 10);
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (isResizing) {
-                const newWidth = e.clientX - todoContainer.getBoundingClientRect().left;
-                const newHeight = e.clientY - todoContainer.getBoundingClientRect().top;
-                todoContainer.style.width = `${newWidth}px`;
-                todoContainer.style.height = `${newHeight}px`;
-            }
-        });
+        // Load saved position
+        const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
+        if (savedPosition) {
+            let savedLeft = parseInt(savedPosition.left, 10);
+            let savedTop = parseInt(savedPosition.top, 10);
 
-        document.addEventListener('mouseup', () => {
-            isResizing = false;
-        });
+            // Constrain within viewport
+            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
+            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
+
+            todoContainer.style.left = `${savedLeft}px`;
+            todoContainer.style.top = `${savedTop}px`;
+            todoContainer.style.bottom = 'auto';
+            todoContainer.style.right = 'auto';
+        }
+
+        // Load saved size
+        const savedSize = JSON.parse(localStorage.getItem('todoListSize'));
+        if (savedSize) {
+            todoContainer.style.width = savedSize.width;
+            todoContainer.style.height = savedSize.height;
+        } else {
+            // Set default size
+            todoContainer.style.width = '300px';
+            todoContainer.style.height = '250px';
+        }
 
         document.body.appendChild(todoContainer);
 
@@ -596,8 +718,13 @@
             const todoItem = document.createElement('li');
             const currentIndex = todoList.children.length + 1;
             todoItem.textContent = `${currentIndex}. ${todo}`;
-            todoItem.style.margin = '5px 0';
-            todoItem.style.cursor = 'pointer';
+            Object.assign(todoItem.style, {
+                margin: '5px 0',
+                cursor: 'pointer',
+                padding: '5px',
+                borderRadius: '3px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            });
             todoItem.addEventListener('click', () => {
                 todoItem.remove();
                 saveTodos();
@@ -700,10 +827,10 @@
         let adjustedTop = rect.top;
 
         if (rect.right > window.innerWidth) {
-            adjustedLeft = window.innerWidth - element.offsetWidth;
+            adjustedLeft = window.innerWidth - rect.width;
         }
         if (rect.bottom > window.innerHeight) {
-            adjustedTop = window.innerHeight - element.offsetHeight;
+            adjustedTop = window.innerHeight - rect.height;
         }
         if (rect.left < 0) {
             adjustedLeft = 0;
@@ -721,6 +848,7 @@
             top: element.style.top
         }));
     }
+
 
     //Add Inspirational Quote of the Day function
     function addInspirationalQuote() {
@@ -788,7 +916,7 @@
             "Life is about making an impact, not making an income. - Kevin Kruse",
             "Believe in the power of your dreams. - Anonymous"
         ];
-        
+
         const link = document.createElement('link');
         link.href = 'https://fonts.googleapis.com/css2?family=Lobster&display=swap';
         link.rel = 'stylesheet';
