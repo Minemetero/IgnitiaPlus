@@ -19,13 +19,15 @@ We actually don't need it, but... to fill up the pages.
 Know what to do, make a plan for yourself, and make your life clear! Be successful; archive your goal, your dream!
 
 ### 🎛️ Sober Minibar
-
 The Sober Minibar is a versatile toolbar that provides quick access to several tools and widgets. It includes:
 
 - **Developer Credit**: I need my name on it so I feel honer.
 - **Calculator Tool**: A simple calculator that evaluates expressions when you press Enter. (Big Thanks to [MathJs](https://mathjs.org))
 - **Notes Section**: Whos knows what you going todo with it.
 - **Toggle Menu**: Allows you to enable or disable widgets like the Clock, Class Timetable, and Todo List.
+
+### 🌈 Inspirational Quote of the Day
+Idk if it going to help u, I feel boring so I made this feature.
 
 ### ⚠️ Refresh Warning
 It's annoying, we all know; now we fixed it!
@@ -35,15 +37,15 @@ There is no excuse for you to click on logout accidentally anymore. ahahahahaha
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! If you have suggestions or improvements, feel free to fork the repository and submit a pull request.
 
-## License
+## 📜 License
 
 This project is licensed under the Apache-2.0 License.
 
-## Author
+## 👨‍💻 Author
 
 Developed by Minemetero.
 

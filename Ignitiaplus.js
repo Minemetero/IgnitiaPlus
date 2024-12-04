@@ -4,9 +4,9 @@
 // @version      1.4.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
-// @author       
+// @author       Minemetero
 // @match        *://*.ignitiaschools.com/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=ignitiaschools.com
+// @icon         https://github.com/Minemetero/Minemetero/blob/master/favicon.png
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
