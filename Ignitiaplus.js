@@ -611,81 +611,38 @@
         document.body.appendChild(toolbar);
     }
 
-    /*** Inspirational Quote ***/
-    function addInspirationalQuote() {
-        const quotes = [
-            "The best way to predict your future is to create it. - Abraham Lincoln",
-            "You are never too old to set another goal or to dream a new dream. - C.S. Lewis",
-            "Believe you can and you're halfway there. - Theodore Roosevelt",
-            "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
-            "Your time is limited, don't waste it living someone else's life. - Steve Jobs",
-            "The only way to do great work is to love what you do. - Steve Jobs",
-            "Success is not the key to happiness. Happiness is the key to success. - Albert Schweitzer",
-            "Hardships often prepare ordinary people for an extraordinary destiny. - C.S. Lewis",
-            "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
-            "It does not matter how slowly you go as long as you do not stop. - Confucius",
-            "Dream big and dare to fail. - Norman Vaughan",
-            "Keep your face always toward the sunshine—and shadows will fall behind you. - Walt Whitman",
-            "Act as if what you do makes a difference. It does. - William James",
-            "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill",
-            "What lies behind us and what lies before us are tiny matters compared to what lies within us. - Ralph Waldo Emerson",
-            "Happiness is not something ready made. It comes from your own actions. - Dalai Lama",
-            "Do not wait to strike till the iron is hot, but make it hot by striking. - William Butler Yeats",
-            "You miss 100% of the shots you don’t take. - Wayne Gretzky",
-            "The only limit to our realization of tomorrow will be our doubts of today. - Franklin D. Roosevelt",
-            "I can’t change the direction of the wind, but I can adjust my sails to always reach my destination. - Jimmy Dean",
-            "If you want to achieve greatness stop asking for permission. - Anonymous",
-            "The only place where success comes before work is in the dictionary. - Vidal Sassoon",
-            "Fall seven times and stand up eight. - Japanese Proverb",
-            "Opportunities don’t happen, you create them. - Chris Grosser",
-            "Don’t wait. The time will never be just right. - Napoleon Hill",
-            "In the middle of every difficulty lies opportunity. - Albert Einstein",
-            "Strive not to be a success, but rather to be of value. - Albert Einstein",
-            "Life is 10% what happens to us and 90% how we react to it. - Charles R. Swindoll",
-            "What you get by achieving your goals is not as important as what you become by achieving your goals. - Zig Ziglar",
-            "If you want to lift yourself up, lift up someone else. - Booker T. Washington",
-            "Do what you can, with what you have, where you are. - Theodore Roosevelt",
-            "Courage is not the absence of fear, but the triumph over it. - Nelson Mandela",
-            "The only journey is the one within. - Rainer Maria Rilke",
-            "Challenges are what make life interesting, and overcoming them is what makes life meaningful. - Joshua J. Marine",
-            "Do not follow where the path may lead. Go instead where there is no path and leave a trail. - Ralph Waldo Emerson",
-            "Success usually comes to those who are too busy to be looking for it. - Henry David Thoreau",
-            "It always seems impossible until it’s done. - Nelson Mandela",
-            "Don’t be pushed around by the fears in your mind. Be led by the dreams in your heart. - Roy T. Bennett",
-            "The biggest risk is not taking any risk. - Mark Zuckerberg",
-            "Success is not in what you have, but who you are. - Bo Bennett",
-            "You don’t have to be great to start, but you have to start to be great. - Zig Ziglar",
-            "Hustle until your haters ask if you’re hiring. - Anonymous",
-            "Do something today that your future self will thank you for. - Sean Patrick Flanery",
-            "Opportunities are like sunrises. If you wait too long, you miss them. - William Arthur Ward",
-            "The secret of getting ahead is getting started. - Mark Twain",
-            "Success is walking from failure to failure with no loss of enthusiasm. - Winston Churchill",
-            "Your limitation—it’s only your imagination. - Anonymous",
-            "Dream it. Wish it. Do it. - Anonymous",
-            "Nothing will work unless you do. - Maya Angelou",
-            "If you can dream it, you can do it. - Walt Disney",
-            "Act as though it were impossible to fail. - Dorothea Brande",
-            "Believe in yourself and all that you are. - Christian D. Larson",
-            "The best time to plant a tree was 20 years ago. The second best time is now. - Chinese Proverb",
-            "Every moment is a fresh beginning. - T.S. Eliot",
-            "Don’t let yesterday take up too much of today. - Will Rogers",
-            "Turn your wounds into wisdom. - Oprah Winfrey",
-            "Success is a state of mind. If you want success, start thinking of yourself as a success. - Joyce Brothers",
-            "Great things are done by a series of small things brought together. - Vincent Van Gogh",
-            "If opportunity doesn’t knock, build a door. - Milton Berle",
-            "Perseverance is not a long race; it is many short races one after another. - Walter Elliot",
-            "Life is about making an impact, not making an income. - Kevin Kruse",
-            "Believe in the power of your dreams. - Anonymous"
-        ];
+    /*** Inspirational Quote (Fetched from external JSON) ***/
+    async function loadAndDisplayQuote() {
+        // Replace this URL with your own GitHub/raw link to the quotes JSON file
+        const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
 
+        try {
+            const response = await fetch(quotesURL, { cache: "no-store" });
+            if (!response.ok) {
+                console.error("Failed to load quotes:", response.statusText);
+                return;
+            }
+
+            const quotes = await response.json();
+            if (!Array.isArray(quotes) || quotes.length === 0) {
+                console.error("Quotes file is empty or not an array.");
+                return;
+            }
+
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+            const quote = quotes[dayOfYear % quotes.length];
+            displayQuote(quote);
+        } catch (error) {
+            console.error("Error fetching quotes:", error);
+        }
+    }
+
+    function displayQuote(quote) {
         const link = document.createElement('link');
         link.href = 'https://fonts.googleapis.com/css2?family=Merriweather&display=swap';
         link.rel = 'stylesheet';
         document.head.appendChild(link);
-
-        const today = new Date();
-        const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-        const quote = quotes[dayOfYear % quotes.length];
 
         const quoteContainer = document.createElement('div');
         Object.assign(quoteContainer.style, {
@@ -705,7 +662,7 @@
     async function init() {
         injectCSS();
         if (window.location.pathname === '/owsoo/login/auth') {
-            addInspirationalQuote();
+            await loadAndDisplayQuote();
         } else {
             modifyPageHead();
             removeUnwantedElements();
