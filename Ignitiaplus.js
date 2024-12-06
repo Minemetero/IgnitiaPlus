@@ -759,13 +759,25 @@
                 padding: '5px',
                 borderRadius: '3px',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                textDecoration: 'none' // Initial state without strikethrough
             });
-            // Event listener to remove todo item on click
+    
+            // Event listener to toggle completion state
             todoItem.addEventListener('click', () => {
+                if (todoItem.style.textDecoration === 'line-through') {
+                    todoItem.style.textDecoration = 'none'; // Deselect the item
+                } else {
+                    todoItem.style.textDecoration = 'line-through'; // Cross out the item
+                }
+            });
+    
+            // Event listener to remove item on double-click
+            todoItem.addEventListener('dblclick', () => {
                 todoItem.remove();
                 saveTodos();
                 updateTodoList();
             });
+    
             todoList.appendChild(todoItem);
             saveTodos();
         }
