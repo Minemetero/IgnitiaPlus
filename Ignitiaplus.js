@@ -612,7 +612,6 @@
 
     /*** Inspirational Quote ***/
     async function loadAndDisplayQuote() {
-        // Replace this URL with your own GitHub/raw link to the quotes JSON file
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
 
         try {
@@ -661,19 +660,19 @@
     function logOut() {
         const passwordResetForm = document.getElementById("passwordResetFormWrapper");
         if (!passwordResetForm) return;
-    
+
         const signOutButton = document.createElement('button');
         signOutButton.id = 'signOut';
         signOutButton.className = 'btn btn-default btn-block';
         signOutButton.textContent = 'Sign Out';
-    
+
         passwordResetForm.appendChild(signOutButton);
-    
+
         signOutButton.addEventListener('click', () => {
             const logoutUrl = `${window.location.origin}/owsoo/j_spring_security_logout`;
             window.location.href = logoutUrl;
         });
-    }    
+    }
 
     /*** Initialization ***/
     async function init() {
