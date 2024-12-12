@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.3.1
+// @version      1.4.2
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
 // @match        *://*.ignitiaschools.com/*
-// @exclude      *://*.ignitiaschools.com/owsoo/login/auth
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=ignitiaschools.com
+// @icon         https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
@@ -19,30 +18,151 @@
 (function () {
     'use strict';
 
-    // Global variables for widgets
-    let clock, timetableContainer, todoContainer;
+    let clockWidget, timetableWidget, todoWidget;
 
-    // Modify the page title and favicon
-    function modifyPageHead() {
-        const titleElement = document.querySelector('title');
-        if (titleElement) {
-            if (titleElement.textContent.trim() === 'Ignitia') {
-                titleElement.textContent = 'IgnitiaPlus';
-                injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
-            } else if (titleElement.textContent.trim() === 'switchedonuk') {
-                titleElement.textContent = 'SwitchedOnPlus';
-                injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
+    /*** CSS Injection ***/
+    function injectCSS() {
+        const style = document.createElement('style');
+        style.textContent = `
+            /* General Widget Styles */
+            #clockWidget, #timetableWidget, #todoWidget, #minimalist-toolbar-popup {
+                position: fixed;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                border-radius: 5px;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                z-index: 1000;
+                user-select: none;
+                overflow: hidden;
             }
-        }
+
+            #clockWidget, #timetableWidget, #todoWidget {
+                max-width: 90vw;
+                max-height: 90vh;
+            }
+
+            #clockWidget {
+                bottom: 10px; right: 10px;
+                background-color: rgba(0, 0, 0, 0.5);
+                padding: 5px 10px;
+                cursor: move;
+            }
+
+            #timetableWidget {
+                bottom: 60px; left: 10px;
+                padding: 10px; overflow-y: auto;
+            }
+
+            #timetableWidget textarea {
+                width: 100%;
+                height: calc(100% - 40px);
+                background: transparent; color: white;
+                border: none; outline: none;
+                resize: none;
+                margin-top: 5px;
+            }
+
+            #todoWidget {
+                bottom: 0px; left: 10px;
+                padding: 10px; overflow: auto;
+            }
+
+            #todoWidget ul {
+                list-style-type: none;
+                padding: 0; margin-top: 10px;
+            }
+
+            #todoWidget ul li {
+                margin: 0;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 3px;
+                background-color: rgba(255,255,255,0.1);
+            }
+
+            /* Resize Handles */
+            .resize-handle {
+                width: 10px; height: 10px;
+                background-color: rgba(255, 255, 255, 0.5);
+                position: absolute;
+                bottom: 0; right: 0;
+                cursor: nwse-resize;
+            }
+
+            #todoWidget .resize-handle {
+                width: 15px; height: 15px;
+                background-color: rgba(255, 255, 255, 0.7);
+                border-bottom-right-radius: 5px;
+            }
+
+            /* Minimalist Toolbar */
+            #minimalist-toolbar-popup {
+                top: 50px; left: 10px;
+                width: 250px;
+                background: #f9f9f9; color: #333;
+                padding: 15px; border: 1px solid #ddd;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                display: none; flex-direction: column; align-items: center;
+                border-radius: 10px; z-index: 1000;
+                font-family: Arial, sans-serif;
+            }
+
+            #minimalist-toolbar-popup textarea {
+                width: 100%; background: #fff; color: #333;
+                border: 1px solid #ddd; border-radius: 5px;
+                padding: 10px; outline: none; resize: none;
+            }
+
+            #minimalist-calculator {
+                height: 50px; margin-bottom: 15px;
+            }
+
+            #minimalist-notes {
+                height: 100px;
+            }
+
+            #minimalist-toolbar-popup .toggle-widgets {
+                background-color: rgba(0,0,0,0.9);
+                color: white; padding: 10px;
+                border-radius: 5px; width: 100%;
+                margin-top: 10px;
+                display: flex; flex-direction: column;
+            }
+
+            /* Toolbar Toggle */
+            #minimalist-toolbar-toggle {
+                position: fixed; top: 10px; left: 10px;
+                width: 50px; height: 50px;
+                background-color: #007BFF; color: #fff;
+                text-align: center; line-height: 50px;
+                border-radius: 50%; font-size: 20px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 1001; cursor: pointer;
+            }
+
+            /* Dark Reader Toggle */
+            #dark-reader-toggle {
+                position: fixed; bottom: 20px; left: 20px;
+                z-index: 10000; padding: 10px;
+                background-color: rgba(0,0,0,0.5);
+                color: white; border-radius: 50%;
+                cursor: pointer; font-size: 20px;
+                text-align: center;
+            }
+
+            /* FadeIn Keyframe for Quote */
+            @keyframes fadeIn {
+                to { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
-    // Inject favicon into the page
+    /*** Utility Functions ***/
     function injectFavicon(href) {
         const existingFavicon = document.querySelector('link[rel="shortcut icon"]');
-        if (existingFavicon) {
-            existingFavicon.remove();
-        }
-
+        if (existingFavicon) existingFavicon.remove();
         const faviconLink = document.createElement('link');
         faviconLink.rel = 'shortcut icon';
         faviconLink.href = href;
@@ -50,303 +170,375 @@
         document.head.appendChild(faviconLink);
     }
 
-    // Remove unwanted elements from the page
+    function adjustElementPosition(element, storageKey) {
+        if (!element) return;
+        let rect = element.getBoundingClientRect();
+        let adjustedLeft = rect.left;
+        let adjustedTop = rect.top;
+        if (rect.right > window.innerWidth) adjustedLeft = window.innerWidth - rect.width;
+        if (rect.bottom > window.innerHeight) adjustedTop = window.innerHeight - rect.height;
+        if (rect.left < 0) adjustedLeft = 0;
+        if (rect.top < 0) adjustedTop = 0;
+        element.style.left = `${adjustedLeft}px`;
+        element.style.top = `${adjustedTop}px`;
+        localStorage.setItem(storageKey, JSON.stringify({ left: element.style.left, top: element.style.top }));
+    }
+
+    function loadSavedPositionAndSize(element, posKey, sizeKey) {
+        const savedPos = JSON.parse(localStorage.getItem(posKey));
+        if (savedPos) {
+            let left = parseInt(savedPos.left, 10);
+            let top = parseInt(savedPos.top, 10);
+            left = Math.max(0, Math.min(left, window.innerWidth - element.offsetWidth));
+            top = Math.max(0, Math.min(top, window.innerHeight - element.offsetHeight));
+            element.style.left = `${left}px`;
+            element.style.top = `${top}px`;
+            element.style.bottom = 'auto'; element.style.right = 'auto';
+        }
+        const savedSize = JSON.parse(localStorage.getItem(sizeKey));
+        if (savedSize) {
+            element.style.width = savedSize.width;
+            element.style.height = savedSize.height;
+        }
+    }
+
+    /*** Page Modifiers ***/
+    function modifyPageHead() {
+        const titleElement = document.querySelector('title');
+        if (!titleElement) return;
+        const titleText = titleElement.textContent.trim();
+        if (titleText === 'Ignitia') {
+            titleElement.textContent = 'IgnitiaPlus';
+            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
+        } else if (titleText === 'switchedonuk') {
+            titleElement.textContent = 'SwitchedOnPlus';
+            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
+        }
+    }
+
     function removeUnwantedElements() {
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
         const footerElement = document.getElementById('footer');
-
-        if (signOutElement) {
-            signOutElement.remove();
-        }
-
-        if (footerElement) {
-            footerElement.remove();
-        }
-
+        if (signOutElement) signOutElement.remove();
+        if (footerElement) footerElement.remove();
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
-    // Add a customizable clock to the page
-    function addCustomizableClock() {
-        clock = document.createElement('div');
-        Object.assign(clock.style, {
-            position: 'fixed',
-            bottom: '10px',
-            right: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            padding: '5px 10px',
-            borderRadius: '5px',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '14px',
-            zIndex: '1000',
-            cursor: 'move',
-            userSelect: 'none',
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            overflow: 'hidden',
-        });
-        clock.id = 'clock';
-
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            clock.textContent = `${hours}:${minutes}:${seconds}`;
-        }
-
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        clock.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - clock.offsetLeft;
-            offsetY = e.clientY - clock.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-
-                // Constrain within viewport
-                newX = Math.max(0, Math.min(newX, window.innerWidth - clock.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - clock.offsetHeight));
-
-                clock.style.left = `${newX}px`;
-                clock.style.top = `${newY}px`;
-                clock.style.bottom = 'auto';
-                clock.style.right = 'auto';
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('clockPosition', JSON.stringify({
-                    left: clock.style.left,
-                    top: clock.style.top
-                }));
-            }
-        });
-
-        const savedPosition = JSON.parse(localStorage.getItem('clockPosition'));
-        if (savedPosition) {
-            let savedLeft = parseInt(savedPosition.left, 10);
-            let savedTop = parseInt(savedPosition.top, 10);
-
-            // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - clock.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - clock.offsetHeight));
-
-            clock.style.left = `${savedLeft}px`;
-            clock.style.top = `${savedTop}px`;
-            clock.style.bottom = 'auto';
-            clock.style.right = 'auto';
-        }
-
-        updateClock();
-        setInterval(updateClock, 1000);
-        document.body.appendChild(clock);
-    }
-
-    // Add class timetable widget
-    function addClassTimetable() {
-        timetableContainer = document.createElement('div');
-        Object.assign(timetableContainer.style, {
-            position: 'fixed',
-            bottom: '60px',
-            left: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '14px',
-            zIndex: '1000',
-            maxWidth: '30vw',
-            maxHeight: '40vh',
-            overflowY: 'auto',
-            cursor: 'move',
-            userSelect: 'none'
-        });
-        timetableContainer.id = 'timetableContainer';
-
-        const timetableHeader = document.createElement('div');
-        timetableHeader.textContent = '📅 Class Timetable';
-        timetableHeader.style.fontWeight = 'bold';
-        timetableContainer.appendChild(timetableHeader);
-
-        const timetableBody = document.createElement('textarea');
-        Object.assign(timetableBody.style, {
-            width: '100%',
-            height: '150px',
-            backgroundColor: 'transparent',
-            color: 'white',
-            border: 'none',
-            outline: 'none',
-            resize: 'none',
-            marginTop: '5px'
-        });
-        timetableBody.placeholder = 'Enter your class schedule here...';
-        timetableBody.value = localStorage.getItem('timetable') || '';
-        timetableBody.addEventListener('input', () => {
-            localStorage.setItem('timetable', timetableBody.value);
-        });
-        timetableContainer.appendChild(timetableBody);
-
-        document.body.appendChild(timetableContainer);
-
-        const savedPosition = JSON.parse(localStorage.getItem('timetablePosition'));
-        if (savedPosition) {
-            let savedLeft = parseInt(savedPosition.left, 10);
-            let savedTop = parseInt(savedPosition.top, 10);
-
-            // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - timetableContainer.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - timetableContainer.offsetHeight));
-
-            timetableContainer.style.left = `${savedLeft}px`;
-            timetableContainer.style.top = `${savedTop}px`;
-            timetableContainer.style.bottom = 'auto';
-            timetableContainer.style.right = 'auto';
-        }
-
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        timetableHeader.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - timetableContainer.offsetLeft;
-            offsetY = e.clientY - timetableContainer.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-
-                // Constrain within viewport
-                newX = Math.max(0, Math.min(newX, window.innerWidth - timetableContainer.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - timetableContainer.offsetHeight));
-
-                timetableContainer.style.left = `${newX}px`;
-                timetableContainer.style.top = `${newY}px`;
-                timetableContainer.style.bottom = 'auto';
-                timetableContainer.style.right = 'auto';
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('timetablePosition', JSON.stringify({
-                    left: timetableContainer.style.left,
-                    top: timetableContainer.style.top
-                }));
-            }
-        });
-    }
-
-    // Add refresh warning to prevent accidental navigation
     function addRefreshWarning() {
+        if (window.location.href.includes('/owsoo/home')) return;
         let warningActive = false;
-
-        if (window.location.href.includes('/owsoo/home')) {
-            return;
-        }
         window.addEventListener('beforeunload', (event) => {
             if (!warningActive) {
                 warningActive = true;
                 event.preventDefault();
-                event.returnValue = ''; // Required for some browsers to show the dialog
-                setTimeout(() => {
-                    warningActive = false;
-                }, 5000);
+                event.returnValue = '';
+                setTimeout(() => { warningActive = false; }, 5000);
             }
         });
     }
 
-    // Add sober minibar with tools
+    /*** Widgets ***/
+    function addCustomizableClock() {
+        clockWidget = document.createElement('div');
+        clockWidget.id = 'clockWidget';
+
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+
+        function updateClock() {
+            const now = new Date();
+            const h = now.getHours().toString().padStart(2, '0');
+            const m = now.getMinutes().toString().padStart(2, '0');
+            const s = now.getSeconds().toString().padStart(2, '0');
+            clockWidget.textContent = `${h}:${m}:${s}`;
+            clockWidget.appendChild(resizeHandle);
+        }
+
+        let isDragging = false, isResizing = false, offsetX, offsetY;
+        clockWidget.addEventListener('mousedown', (e) => {
+            if (e.target === resizeHandle) return;
+            isDragging = true;
+            offsetX = e.clientX - clockWidget.offsetLeft;
+            offsetY = e.clientY - clockWidget.offsetTop;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+                newX = Math.max(0, Math.min(newX, window.innerWidth - clockWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - clockWidget.offsetHeight));
+                clockWidget.style.left = `${newX}px`;
+                clockWidget.style.top = `${newY}px`;
+            } else if (isResizing) {
+                const newWidth = e.clientX - clockWidget.getBoundingClientRect().left;
+                const newHeight = e.clientY - clockWidget.getBoundingClientRect().top;
+                clockWidget.style.width = `${newWidth}px`;
+                clockWidget.style.height = `${newHeight}px`;
+                localStorage.setItem('clockWidgetSize', JSON.stringify({ width: clockWidget.style.width, height: clockWidget.style.height }));
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                localStorage.setItem('clockWidgetPosition', JSON.stringify({ left: clockWidget.style.left, top: clockWidget.style.top }));
+            }
+            if (isResizing) isResizing = false;
+        });
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        updateClock();
+        setInterval(updateClock, 1000);
+        document.body.appendChild(clockWidget);
+        loadSavedPositionAndSize(clockWidget, 'clockWidgetPosition', 'clockWidgetSize');
+    }
+
+    function addClassTimetable() {
+        timetableWidget = document.createElement('div');
+        timetableWidget.id = 'timetableWidget';
+
+        const timetableHeader = document.createElement('div');
+        timetableHeader.textContent = '📅 Class Timetable';
+        timetableHeader.style.fontWeight = 'bold';
+        timetableHeader.style.cursor = 'move';
+
+        const timetableBody = document.createElement('textarea');
+        timetableBody.placeholder = 'Enter your class schedule here...';
+        timetableBody.value = localStorage.getItem('timetable') || '';
+        timetableBody.addEventListener('input', () => localStorage.setItem('timetable', timetableBody.value));
+
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+
+        timetableWidget.appendChild(timetableHeader);
+        timetableWidget.appendChild(timetableBody);
+        timetableWidget.appendChild(resizeHandle);
+        document.body.appendChild(timetableWidget);
+
+        let isDragging = false, isResizing = false, offsetX, offsetY;
+        timetableHeader.addEventListener('mousedown', (e) => {
+            if (e.target === resizeHandle) return;
+            isDragging = true;
+            offsetX = e.clientX - timetableWidget.offsetLeft;
+            offsetY = e.clientY - timetableWidget.offsetTop;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+                newX = Math.max(0, Math.min(newX, window.innerWidth - timetableWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - timetableWidget.offsetHeight));
+                timetableWidget.style.left = `${newX}px`;
+                timetableWidget.style.top = `${newY}px`;
+            } else if (isResizing) {
+                const newWidth = e.clientX - timetableWidget.getBoundingClientRect().left;
+                const newHeight = e.clientY - timetableWidget.getBoundingClientRect().top;
+                timetableWidget.style.width = `${newWidth}px`;
+                timetableWidget.style.height = `${newHeight}px`;
+                timetableBody.style.height = 'calc(100% - 40px)';
+                localStorage.setItem('timetableWidgetSize', JSON.stringify({ width: timetableWidget.style.width, height: timetableWidget.style.height }));
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                localStorage.setItem('timetableWidgetPosition', JSON.stringify({ left: timetableWidget.style.left, top: timetableWidget.style.top }));
+            }
+            if (isResizing) isResizing = false;
+        });
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        loadSavedPositionAndSize(timetableWidget, 'timetableWidgetPosition', 'timetableWidgetSize');
+    }
+
+    function addTodoList() {
+        todoWidget = document.createElement('div');
+        todoWidget.id = 'todoWidget';
+
+        const todoHeader = document.createElement('div');
+        todoHeader.textContent = '📝 Todo List';
+        todoHeader.style.fontWeight = 'bold';
+        todoHeader.style.marginBottom = '5px';
+        todoHeader.style.cursor = 'move';
+
+        const todoInput = document.createElement('input');
+        todoInput.placeholder = 'Add a new task...';
+        Object.assign(todoInput.style, { width: '90%', padding: '5px', borderRadius: '3px', border: '1px solid #ddd' });
+
+        const todoList = document.createElement('ul');
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+
+        todoWidget.appendChild(todoHeader);
+        todoWidget.appendChild(todoInput);
+        todoWidget.appendChild(todoList);
+        todoWidget.appendChild(resizeHandle);
+        document.body.appendChild(todoWidget);
+
+        const savedTodos = JSON.parse(localStorage.getItem('todoItems')) || [];
+        savedTodos.forEach(addTodoItem);
+
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && todoInput.value.trim() !== '') {
+                addTodoItem(todoInput.value.trim());
+                todoInput.value = '';
+            }
+        });
+
+        let isDragging = false, isResizing = false, offsetX, offsetY;
+        let startX, startY, startWidth, startHeight;
+
+        todoHeader.addEventListener('mousedown', (e) => {
+            if (isResizing) return;
+            isDragging = true;
+            offsetX = e.clientX - todoWidget.offsetLeft;
+            offsetY = e.clientY - todoWidget.offsetTop;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                let newX = e.clientX - offsetX;
+                let newY = e.clientY - offsetY;
+                newX = Math.max(0, Math.min(newX, window.innerWidth - todoWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - todoWidget.offsetHeight));
+                todoWidget.style.left = `${newX}px`;
+                todoWidget.style.top = `${newY}px`;
+            } else if (isResizing) {
+                const deltaX = e.clientX - startX;
+                const deltaY = e.clientY - startY;
+                const newWidth = Math.max(startWidth + deltaX, 50);
+                const newHeight = Math.max(startHeight + deltaY, 50);
+                todoWidget.style.width = `${newWidth}px`;
+                todoWidget.style.height = `${newHeight}px`;
+                localStorage.setItem('todoWidgetSize', JSON.stringify({ width: todoWidget.style.width, height: todoWidget.style.height }));
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                localStorage.setItem('todoWidgetPosition', JSON.stringify({ left: todoWidget.style.left, top: todoWidget.style.top }));
+            }
+            if (isResizing) isResizing = false;
+        });
+
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            e.preventDefault();
+            e.stopPropagation();
+            startX = e.clientX;
+            startY = e.clientY;
+            startWidth = parseInt(document.defaultView.getComputedStyle(todoWidget).width, 10);
+            startHeight = parseInt(document.defaultView.getComputedStyle(todoWidget).height, 10);
+        });
+
+        loadSavedPositionAndSize(todoWidget, 'todoWidgetPosition', 'todoWidgetSize');
+        if (!localStorage.getItem('todoWidgetSize')) {
+            todoWidget.style.width = '150px';
+            todoWidget.style.height = '200px';
+        }
+
+        function addTodoItem(todoText) {
+            const todoItem = document.createElement('li');
+            const index = todoList.children.length + 1;
+            todoItem.textContent = `${index}. ${todoText}`;
+            todoItem.addEventListener('click', () => {
+                todoItem.style.textDecoration = (todoItem.style.textDecoration === 'line-through') ? 'none' : 'line-through';
+            });
+            todoItem.addEventListener('dblclick', () => {
+                todoItem.remove();
+                saveTodos();
+                updateTodoIndices();
+            });
+            todoList.appendChild(todoItem);
+            saveTodos();
+        }
+
+        function saveTodos() {
+            const todos = Array.from(todoList.children).map(item => item.textContent.split('. ')[1]);
+            localStorage.setItem('todoItems', JSON.stringify(todos));
+        }
+
+        function updateTodoIndices() {
+            Array.from(todoList.children).forEach((item, index) => {
+                const text = item.textContent.split('. ')[1];
+                item.textContent = `${index + 1}. ${text}`;
+            });
+        }
+    }
+
+    /*** Dark Mode Toggle ***/
+    async function createDarkReaderToggle() {
+        const btn = document.createElement('div');
+        btn.id = 'dark-reader-toggle';
+        btn.textContent = '🔆';
+        btn.addEventListener('click', async () => {
+            if (await GM.getValue('darkMode', false)) {
+                await GM.setValue('darkMode', false);
+                disableDarkMode();
+            } else {
+                await GM.setValue('darkMode', true);
+                enableDarkMode();
+            }
+        });
+        document.body.appendChild(btn);
+
+        if (await GM.getValue('darkMode', false)) enableDarkMode();
+        else disableDarkMode();
+    }
+
+    function enableDarkMode() {
+        DarkReader.setFetchMethod(window.fetch);
+        DarkReader.enable({ brightness: 105, contrast: 105, sepia: 0 });
+        const btn = document.getElementById('dark-reader-toggle');
+        if (btn) btn.textContent = '🔅';
+        const logoElement = document.querySelector('#gl_logo img');
+        if (logoElement) logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+    }
+
+    function disableDarkMode() {
+        DarkReader.disable();
+        const btn = document.getElementById('dark-reader-toggle');
+        if (btn) btn.textContent = '🔆';
+        const logoElement = document.querySelector('#gl_logo img');
+        if (logoElement) logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+    }
+
+    /*** Minimalist Toolbar ***/
     function addSoberMinibar() {
         const toolbar = document.createElement('div');
-        Object.assign(toolbar.style, {
-            position: 'fixed',
-            top: '50px',
-            left: '10px',
-            width: '250px',
-            backgroundColor: '#f9f9f9',
-            color: '#333',
-            padding: '15px',
-            borderRadius: '10px',
-            border: '1px solid #ddd',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-            fontFamily: '"Arial", sans-serif',
-            fontSize: '14px',
-            zIndex: '1000',
-            display: 'none',
-            flexDirection: 'column',
-            alignItems: 'center',
-        });
         toolbar.id = 'minimalist-toolbar-popup';
 
-        // Toggle button to show/hide the toolbar
         const toggleButton = document.createElement('div');
-        Object.assign(toggleButton.style, {
-            position: 'fixed',
-            top: '10px',
-            left: '10px',
-            width: '50px',
-            height: '50px',
-            backgroundColor: '#007BFF',
-            color: '#fff',
-            textAlign: 'center',
-            lineHeight: '50px',
-            borderRadius: '50%',
-            fontFamily: '"Arial", sans-serif',
-            fontSize: '20px',
-            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
-            zIndex: '1001',
-            cursor: 'pointer',
-            userSelect: 'none',
-        });
+        toggleButton.id = 'minimalist-toolbar-toggle';
         toggleButton.textContent = '☰';
-
         toggleButton.addEventListener('click', () => {
-            toolbar.style.display = toolbar.style.display === 'none' ? 'flex' : 'none';
+            toolbar.style.display = (toolbar.style.display === 'none') ? 'flex' : 'none';
         });
 
-        // Add Developer Name
         const developerName = document.createElement('div');
         developerName.textContent = 'By Minemetero';
-        Object.assign(developerName.style, {
-            fontWeight: 'bold',
-            marginBottom: '15px',
-            fontSize: '16px',
-            color: '#555',
-        });
+        developerName.style.fontWeight = 'bold';
+        developerName.style.marginBottom = '15px';
         toolbar.appendChild(developerName);
 
-        // Calculator Tool
         const calculator = document.createElement('textarea');
         calculator.id = 'minimalist-calculator';
         calculator.placeholder = 'Calculator (press Enter to evaluate)';
-        Object.assign(calculator.style, {
-            width: '100%',
-            height: '50px',
-            marginBottom: '15px',
-            padding: '10px',
-            borderRadius: '5px',
-            backgroundColor: '#fff',
-            color: '#333',
-            border: '1px solid #ddd',
-            outline: 'none',
-            resize: 'none',
-            fontFamily: '"Arial", sans-serif',
-            fontSize: '14px',
-        });
         calculator.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -357,389 +549,154 @@
                         const number = input.slice(5, -1);
                         result = math.sqrt(math.evaluate(number));
                     } else if (input.startsWith('simplify(') && input.endsWith(')')) {
-                        const expression = input.slice(10, -1);
-                        result = math.simplify(expression).toString();
+                        const expr = input.slice(10, -1);
+                        result = math.simplify(expr).toString();
                     } else {
                         result = math.evaluate(input);
                     }
-                    // Round the result if it's a number
-                    if (typeof result === 'number') {
-                        result = math.round(result, 2); // Round to 2 decimal places
-                    }
                     calculator.value = `${result}`;
-                } catch (error) {
+                } catch {
                     calculator.value = 'Error!';
                 }
             }
         });
         toolbar.appendChild(calculator);
 
-        // Notes Section
         const notes = document.createElement('textarea');
         notes.id = 'minimalist-notes';
         notes.placeholder = 'Your Notes...';
-        Object.assign(notes.style, {
-            width: '100%',
-            height: '100px',
-            padding: '10px',
-            borderRadius: '5px',
-            backgroundColor: '#fff',
-            color: '#333',
-            border: '1px solid #ddd',
-            outline: 'none',
-            resize: 'none',
-            fontFamily: '"Arial", sans-serif',
-            fontSize: '14px',
-        });
         notes.value = localStorage.getItem('minimalistNotes') || '';
-        notes.addEventListener('input', () => {
-            localStorage.setItem('minimalistNotes', notes.value);
-        });
+        notes.addEventListener('input', () => localStorage.setItem('minimalistNotes', notes.value));
         toolbar.appendChild(notes);
 
-        // Add Toggle Menu within Sober Minibar
         const toggleMenu = document.createElement('div');
-        Object.assign(toggleMenu.style, {
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '14px',
-            display: 'flex',
-            flexDirection: 'column',
-            marginTop: '10px',
-            width: '100%',
-        });
+        toggleMenu.className = 'toggle-widgets';
 
         const widgets = [
-            { name: 'Clock', id: 'clock', initFunction: addCustomizableClock },
-            { name: 'Class Timetable', id: 'classTimetable', initFunction: addClassTimetable },
-            { name: 'Todo List', id: 'todoList', initFunction: addTodoList }
+            { name: 'Clock', id: 'clockWidget', init: addCustomizableClock },
+            { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
+            { name: 'Todo List', id: 'todoWidget', init: addTodoList }
         ];
 
-        widgets.forEach(widget => {
+        widgets.forEach(w => {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.id = widget.id;
-            checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
+            checkbox.id = w.id;
+            checkbox.checked = JSON.parse(localStorage.getItem(w.id) || 'true');
             checkbox.addEventListener('change', () => {
-                localStorage.setItem(widget.id, checkbox.checked);
-                if (checkbox.checked) {
-                    widget.initFunction();
-                } else {
-                    document.getElementById(widget.id)?.remove();
-                }
+                localStorage.setItem(w.id, checkbox.checked);
+                if (checkbox.checked) w.init();
+                else document.getElementById(w.id)?.remove();
             });
 
             const label = document.createElement('label');
-            label.htmlFor = widget.id;
-            label.textContent = widget.name;
+            label.htmlFor = w.id;
+            label.textContent = w.name;
             label.style.marginBottom = '10px';
             label.style.cursor = 'pointer';
 
-            const widgetContainer = document.createElement('div');
-            widgetContainer.style.display = 'flex';
-            widgetContainer.style.alignItems = 'center';
-            widgetContainer.style.marginBottom = '5px';
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.marginBottom = '5px';
 
-            widgetContainer.appendChild(checkbox);
-            widgetContainer.appendChild(label);
-            toggleMenu.appendChild(widgetContainer);
+            container.appendChild(checkbox);
+            container.appendChild(label);
+            toggleMenu.appendChild(container);
         });
 
         toolbar.appendChild(toggleMenu);
-
         document.body.appendChild(toggleButton);
         document.body.appendChild(toolbar);
     }
 
-    // Add todo list widget
-    function addTodoList() {
-        todoContainer = document.createElement('div');
-        Object.assign(todoContainer.style, {
-            position: 'fixed',
-            bottom: '0px',
-            left: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '5px',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '14px',
-            zIndex: '1000',
-            maxWidth: '250px',
-            maxHeight: '200px',
-            overflowY: 'auto',
-            cursor: 'move',
-            userSelect: 'none'
-        });
-        todoContainer.id = 'todoContainer';
+    /*** Inspirational Quote (Fetched from external JSON) ***/
+    async function loadAndDisplayQuote() {
+        // Replace this URL with your own GitHub/raw link to the quotes JSON file
+        const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
 
-        // Load saved position
-        const savedPosition = JSON.parse(localStorage.getItem('todoListPosition'));
-        if (savedPosition) {
-            let savedLeft = parseInt(savedPosition.left, 10);
-            let savedTop = parseInt(savedPosition.top, 10);
-
-            // Constrain within viewport
-            savedLeft = Math.max(0, Math.min(savedLeft, window.innerWidth - todoContainer.offsetWidth));
-            savedTop = Math.max(0, Math.min(savedTop, window.innerHeight - todoContainer.offsetHeight));
-
-            todoContainer.style.left = `${savedLeft}px`;
-            todoContainer.style.top = `${savedTop}px`;
-        }
-
-        const todoHeader = document.createElement('div');
-        todoHeader.textContent = '📝 Todo List';
-        todoHeader.style.fontWeight = 'bold';
-        todoContainer.appendChild(todoHeader);
-
-        const todoInput = document.createElement('input');
-        todoInput.placeholder = 'Add a new task...';
-        Object.assign(todoInput.style, {
-            width: '90%',
-            padding: '5px',
-            marginTop: '5px',
-            borderRadius: '3px',
-            border: '1px solid #ddd',
-            outline: 'none',
-            fontSize: '14px'
-        });
-        todoContainer.appendChild(todoInput);
-
-        const todoList = document.createElement('ul');
-        todoList.style.listStyleType = 'none';
-        todoList.style.padding = '0';
-        todoContainer.appendChild(todoList);
-
-        // Load saved todo items
-        const savedTodos = JSON.parse(localStorage.getItem('todoItems')) || [];
-        savedTodos.forEach(todo => addTodoItem(todo));
-
-        todoInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && todoInput.value.trim() !== '') {
-                addTodoItem(todoInput.value);
-                todoInput.value = '';
+        try {
+            const response = await fetch(quotesURL, { cache: "no-store" });
+            if (!response.ok) {
+                console.error("Failed to load quotes:", response.statusText);
+                return;
             }
-        });
 
-        // Dragging functionality
-        let isDragging = false;
-        let offsetX, offsetY;
-
-        todoHeader.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - todoContainer.offsetLeft;
-            offsetY = e.clientY - todoContainer.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-
-                // Constrain within viewport
-                newX = Math.max(0, Math.min(newX, window.innerWidth - todoContainer.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - todoContainer.offsetHeight));
-
-                todoContainer.style.left = `${newX}px`;
-                todoContainer.style.top = `${newY}px`;
+            const quotes = await response.json();
+            if (!Array.isArray(quotes) || quotes.length === 0) {
+                console.error("Quotes file is empty or not an array.");
+                return;
             }
-        });
 
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('todoListPosition', JSON.stringify({
-                    left: todoContainer.style.left,
-                    top: todoContainer.style.top
-                }));
-            }
-        });
-
-        // Resizing functionality
-        const resizeHandle = document.createElement('div');
-        Object.assign(resizeHandle.style, {
-            width: '10px',
-            height: '10px',
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            position: 'absolute',
-            bottom: '5px',
-            right: '5px',
-            cursor: 'nwse-resize'
-        });
-        todoContainer.appendChild(resizeHandle);
-
-        let isResizing = false;
-
-        resizeHandle.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isResizing) {
-                const newWidth = e.clientX - todoContainer.getBoundingClientRect().left;
-                const newHeight = e.clientY - todoContainer.getBoundingClientRect().top;
-                todoContainer.style.width = `${newWidth}px`;
-                todoContainer.style.height = `${newHeight}px`;
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isResizing = false;
-        });
-
-        document.body.appendChild(todoContainer);
-
-        function addTodoItem(todo) {
-            const todoItem = document.createElement('li');
-            const currentIndex = todoList.children.length + 1;
-            todoItem.textContent = `${currentIndex}. ${todo}`;
-            todoItem.style.margin = '5px 0';
-            todoItem.style.cursor = 'pointer';
-            todoItem.addEventListener('click', () => {
-                todoItem.remove();
-                saveTodos();
-                updateTodoList();
-            });
-            todoList.appendChild(todoItem);
-            saveTodos();
-        }
-
-        function updateTodoList() {
-            // Update the numbering of the todo items
-            Array.from(todoList.children).forEach((item, index) => {
-                item.textContent = `${index + 1}. ${item.textContent.split('. ')[1]}`;
-            });
-        }
-
-        function saveTodos() {
-            const todos = Array.from(todoList.children).map(item => item.textContent.split('. ')[1]);
-            localStorage.setItem('todoItems', JSON.stringify(todos));
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
+            const quote = quotes[dayOfYear % quotes.length];
+            displayQuote(quote);
+        } catch (error) {
+            console.error("Error fetching quotes:", error);
         }
     }
 
-    // Initialize Dark Reader
-    const namespace = 'dark-reader-toggle';
-    const btn = document.createElement('div');
+    function displayQuote(quote) {
+        const link = document.createElement('link');
+        link.href = 'https://fonts.googleapis.com/css2?family=Merriweather&display=swap';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
 
-    async function createDarkReaderToggle() {
-        // Create button
-        btn.id = namespace;
-        btn.textContent = '🔆';
-        Object.assign(btn.style, {
-            position: 'fixed',
-            bottom: '20px',
-            left: '20px',
-            zIndex: '10000',
-            padding: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            color: 'white',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            fontSize: '20px',
-            textAlign: 'center',
+        const quoteContainer = document.createElement('div');
+        Object.assign(quoteContainer.style, {
+            position: 'fixed', top: '50%', right: '200px',
+            transform: 'translateY(-50%)',
+            background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+            color: 'white', padding: '20px', borderRadius: '15px',
+            fontFamily: '"Merriweather", serif', fontSize: '22px',
+            lineHeight: '1.5', zIndex: '1000', maxWidth: '350px', textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', opacity: '0', animation: 'fadeIn 1s forwards'
         });
+        quoteContainer.textContent = quote;
+        document.body.appendChild(quoteContainer);
+    }
 
-        // Add click event
-        btn.addEventListener('click', async () => {
-            if (await GM.getValue('darkMode', false)) {
-                await GM.setValue('darkMode', false);
-                disableDarkMode();
-            } else {
-                await GM.setValue('darkMode', true);
-                enableDarkMode();
-            }
+    function logOut() {
+        const passwordResetForm = document.getElementById("passwordResetFormWrapper");
+        if (!passwordResetForm) return;
+    
+        const signOutButton = document.createElement('button');
+        signOutButton.id = 'signOut';
+        signOutButton.className = 'btn btn-default btn-block';
+        signOutButton.textContent = 'Sign Out';
+    
+        passwordResetForm.appendChild(signOutButton);
+    
+        signOutButton.addEventListener('click', () => {
+            const logoutUrl = `${window.location.origin}/owsoo/j_spring_security_logout`;
+            window.location.href = logoutUrl;
         });
+    }    
 
-        // Append button
-        document.body.appendChild(btn);
-
-        // Set initial mode
-        if (await GM.getValue('darkMode', false)) {
-            enableDarkMode();
-        } else {
-            disableDarkMode();
-        }
-    }
-
-    // Enable Dark Mode
-    function enableDarkMode() {
-        DarkReader.setFetchMethod(window.fetch);
-        DarkReader.enable({
-            brightness: 105,
-            contrast: 105,
-            sepia: 0,
-        });
-        btn.textContent = '🔅';
-
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) {
-            logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
-        }
-    }
-
-    // Disable Dark Mode
-    function disableDarkMode() {
-        DarkReader.disable();
-        btn.textContent = '🔆';
-
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) {
-            logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
-        }
-    }
-
-    // Adjust element position within viewport
-    function adjustElementPosition(element, storageKey) {
-        if (!element) return;
-        let rect = element.getBoundingClientRect();
-
-        let adjustedLeft = rect.left;
-        let adjustedTop = rect.top;
-
-        if (rect.right > window.innerWidth) {
-            adjustedLeft = window.innerWidth - element.offsetWidth;
-        }
-        if (rect.bottom > window.innerHeight) {
-            adjustedTop = window.innerHeight - element.offsetHeight;
-        }
-        if (rect.left < 0) {
-            adjustedLeft = 0;
-        }
-        if (rect.top < 0) {
-            adjustedTop = 0;
-        }
-
-        element.style.left = `${adjustedLeft}px`;
-        element.style.top = `${adjustedTop}px`;
-
-        // Save adjusted position
-        localStorage.setItem(storageKey, JSON.stringify({
-            left: element.style.left,
-            top: element.style.top
-        }));
-    }
-
-    // Initialize the enhanced UI and features
+    /*** Initialization ***/
     async function init() {
-        modifyPageHead();
-        removeUnwantedElements();
-        addRefreshWarning();
-        await createDarkReaderToggle();
-        addSoberMinibar();
+        injectCSS();
+        if (window.location.pathname === '/owsoo/login/auth') {
+            await loadAndDisplayQuote();
+        } else {
+            modifyPageHead();
+            removeUnwantedElements();
+            addRefreshWarning();
+            await createDarkReaderToggle();
+            addSoberMinibar();
+            logOut();
 
-        // Initialize widgets based on user preferences
-        if (JSON.parse(localStorage.getItem('clock') || 'true')) addCustomizableClock();
-        if (JSON.parse(localStorage.getItem('classTimetable') || 'true')) addClassTimetable();
-        if (JSON.parse(localStorage.getItem('todoList') || 'true')) addTodoList();
+            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
+            if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
+            if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
+        }
     }
+
     window.addEventListener('load', init);
     window.addEventListener('resize', () => {
-        adjustElementPosition(clock, 'clockPosition');
-        adjustElementPosition(timetableContainer, 'timetablePosition');
-        adjustElementPosition(todoContainer, 'todoListPosition');
+        adjustElementPosition(clockWidget, 'clockWidgetPosition');
+        adjustElementPosition(timetableWidget, 'timetableWidgetPosition');
+        adjustElementPosition(todoWidget, 'todoWidgetPosition');
     });
 })();

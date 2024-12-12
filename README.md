@@ -10,30 +10,32 @@ You wasted ten more minutes...
 ### 🎨 Theme Switcher
 Personalize your interface with:
 - **Light Theme**: Classic and clean.
-- **Dark Theme**: YESSSSSSSS, it working! Thanks to [DarkReader](https://github.com/darkreader/darkreader) again.
+- **Dark Theme**: YESSSSSSSS, it's working! Thanks to [DarkReader](https://github.com/darkreader/darkreader) again.
 
 ### 📅 Class Timetable
 We actually don't need it, but... to fill up the pages.
 
 ### 📝 Todo List
-Know what to do, make a plan for yourself, and make your life clear! Be successful; archive your goal, your dream!
+Know what to do, make a plan for yourself, and make your life clear! Be successful; archive your goal, your dream!  
+Usage: Single click, cross out  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Double click, delete  
 
 ### 🎛️ Sober Minibar
 The Sober Minibar is a versatile toolbar that provides quick access to several tools and widgets. It includes:
 
-- **Developer Credit**: I need my name on it so I feel honer.
+- **Developer Credit**: I need my name on it so I feel honored.
 - **Calculator Tool**: A simple calculator that evaluates expressions when you press Enter. (Big Thanks to [MathJs](https://mathjs.org))
-- **Notes Section**: Whos knows what you going todo with it.
+- **Notes Section**: Who knows what you're going to do with it?
 - **Toggle Menu**: Allows you to enable or disable widgets like the Clock, Class Timetable, and Todo List.
 
 ### 🌈 Inspirational Quote of the Day
-Idk if it going to help u, I feel boring so I made this feature.
+Idk if it's going to help u, I feel boring, so I made this feature.
 
 ### ⚠️ Refresh Warning
 It's annoying, we all know; now we fixed it!
 
 ### ⚠️ Anti-Logout
-There is no excuse for you to click on logout accidentally anymore. ahahahahaha
+We put it in a safer place. You have no more justification for accidentally clicking "logout". ahahahahaha
 
 ---
 

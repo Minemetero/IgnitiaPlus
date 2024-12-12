@@ -610,7 +610,7 @@
         document.body.appendChild(toolbar);
     }
 
-    /*** Inspirational Quote (Fetched from external JSON) ***/
+    /*** Inspirational Quote ***/
     async function loadAndDisplayQuote() {
         // Replace this URL with your own GitHub/raw link to the quotes JSON file
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
@@ -657,6 +657,7 @@
         document.body.appendChild(quoteContainer);
     }
 
+    /*** Logout but Better Postion (Credit:BurdenOwl) <- this guys doesn't help me that much... but fine he designed the UI***/
     function logOut() {
         const passwordResetForm = document.getElementById("passwordResetFormWrapper");
         if (!passwordResetForm) return;
