@@ -659,9 +659,8 @@
 
     function logOut() {
         const passwordResetForm = document.getElementById("passwordResetFormWrapper");
-        if (!passwordResetForm) return; // Ensure the element exists
+        if (!passwordResetForm) return;
     
-        // Instead of using innerHTML +=, create the button via DOM methods
         const signOutButton = document.createElement('button');
         signOutButton.id = 'signOut';
         signOutButton.className = 'btn btn-default btn-block';
@@ -670,11 +669,10 @@
         passwordResetForm.appendChild(signOutButton);
     
         signOutButton.addEventListener('click', () => {
-            // Delete the cookie
-            document.cookie = "JSESSIONID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            location.reload();
+            const logoutUrl = `${window.location.origin}/owsoo/j_spring_security_logout`;
+            window.location.href = logoutUrl;
         });
-    };
+    }    
 
     /*** Initialization ***/
     async function init() {
@@ -687,7 +685,7 @@
             addRefreshWarning();
             await createDarkReaderToggle();
             addSoberMinibar();
-            //logOut();
+            logOut();
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
