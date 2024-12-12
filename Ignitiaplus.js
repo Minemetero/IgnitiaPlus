@@ -74,7 +74,7 @@
             }
 
             #todoWidget ul li {
-                margin: 5px 0;
+                margin: 0;
                 cursor: pointer;
                 padding: 5px;
                 border-radius: 3px;
@@ -554,7 +554,6 @@
                     } else {
                         result = math.evaluate(input);
                     }
-                    if (typeof result === 'number') result = `${math.round(result, 2)} (rounded)`;
                     calculator.value = `${result}`;
                 } catch {
                     calculator.value = 'Error!';
@@ -658,6 +657,25 @@
         document.body.appendChild(quoteContainer);
     }
 
+    function logOut() {
+        const passwordResetForm = document.getElementById("passwordResetFormWrapper");
+        if (!passwordResetForm) return; // Ensure the element exists
+    
+        // Instead of using innerHTML +=, create the button via DOM methods
+        const signOutButton = document.createElement('button');
+        signOutButton.id = 'signOut';
+        signOutButton.className = 'btn btn-default btn-block';
+        signOutButton.textContent = 'Sign Out';
+    
+        passwordResetForm.appendChild(signOutButton);
+    
+        signOutButton.addEventListener('click', () => {
+            // Delete the cookie
+            document.cookie = "JSESSIONID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            location.reload();
+        });
+    };
+
     /*** Initialization ***/
     async function init() {
         injectCSS();
@@ -669,6 +687,7 @@
             addRefreshWarning();
             await createDarkReaderToggle();
             addSoberMinibar();
+            //logOut();
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
