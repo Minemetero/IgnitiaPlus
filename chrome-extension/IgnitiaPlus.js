@@ -7,10 +7,8 @@
 // @author       Minemetero
 // @match        *://*.ignitiaschools.com/*
 // @icon         https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png
-// @grant        GM.getValue
-// @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.0.0/math.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/mathjs/14.0.1/math.min.js
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
@@ -98,13 +96,19 @@
 
             /* Minimalist Toolbar */
             #minimalist-toolbar-popup {
-                top: 50px; left: 10px;
+                top: 50px; 
+                left: 10px;
                 width: 250px;
-                background: #f9f9f9; color: #333;
-                padding: 15px; border: 1px solid #ddd;
+                background: #f9f9f9; 
+                color: #333;
+                padding: 15px; 
+                border: 1px solid #ddd;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                display: none; flex-direction: column; align-items: center;
-                border-radius: 10px; z-index: 1000;
+                display: none; 
+                flex-direction: column; 
+                align-items: center;
+                border-radius: 10px; 
+                z-index: 1000;
                 font-family: Arial, sans-serif;
             }
 
@@ -482,40 +486,59 @@
     }
 
     /*** Dark Mode Toggle ***/
+    function getDarkMode() {
+        return new Promise((resolve) => {
+            chrome.storage.sync.get(['darkMode'], (result) => {
+                resolve(result.darkMode || false);
+            });
+        });
+    }
+    
+    function setDarkMode(value) {
+        chrome.storage.sync.set({ darkMode: value });
+    }
+
     async function createDarkReaderToggle() {
         const btn = document.createElement('div');
         btn.id = 'dark-reader-toggle';
         btn.textContent = '🔆';
         btn.addEventListener('click', async () => {
-            if (await GM.getValue('darkMode', false)) {
-                await GM.setValue('darkMode', false);
+            const currentMode = await getDarkMode();
+            setDarkMode(!currentMode);
+            if (currentMode) {
                 disableDarkMode();
             } else {
-                await GM.setValue('darkMode', true);
                 enableDarkMode();
             }
         });
         document.body.appendChild(btn);
-
-        if (await GM.getValue('darkMode', false)) enableDarkMode();
+    
+        const darkMode = await getDarkMode();
+        if (darkMode) enableDarkMode();
         else disableDarkMode();
     }
-
+    
     function enableDarkMode() {
         DarkReader.setFetchMethod(window.fetch);
         DarkReader.enable({ brightness: 105, contrast: 105, sepia: 0 });
         const btn = document.getElementById('dark-reader-toggle');
         if (btn) btn.textContent = '🔅';
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
-    }
 
+        const logoElement = document.querySelector('#gl_logo img');
+        if (logoElement) {
+            logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+        }
+    }
+    
     function disableDarkMode() {
         DarkReader.disable();
         const btn = document.getElementById('dark-reader-toggle');
         if (btn) btn.textContent = '🔆';
+
         const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+        if (logoElement) {
+            logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+        }
     }
 
     /*** Minimalist Toolbar ***/
@@ -610,9 +633,8 @@
         document.body.appendChild(toolbar);
     }
 
-    /*** Inspirational Quote (Fetched from external JSON) ***/
+    /*** Inspirational Quote ***/
     async function loadAndDisplayQuote() {
-        // Replace this URL with your own GitHub/raw link to the quotes JSON file
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
 
         try {
@@ -657,22 +679,23 @@
         document.body.appendChild(quoteContainer);
     }
 
+    /*** Logout but Better Postion (Credit:BurdenOwl) <- this guys doesn't help me that much... but fine he designed the UI***/
     function logOut() {
         const passwordResetForm = document.getElementById("passwordResetFormWrapper");
         if (!passwordResetForm) return;
-    
+
         const signOutButton = document.createElement('button');
         signOutButton.id = 'signOut';
         signOutButton.className = 'btn btn-default btn-block';
         signOutButton.textContent = 'Sign Out';
-    
+
         passwordResetForm.appendChild(signOutButton);
-    
+
         signOutButton.addEventListener('click', () => {
             const logoutUrl = `${window.location.origin}/owsoo/j_spring_security_logout`;
             window.location.href = logoutUrl;
         });
-    }    
+    }
 
     /*** Initialization ***/
     async function init() {

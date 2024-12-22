@@ -98,13 +98,19 @@
 
             /* Minimalist Toolbar */
             #minimalist-toolbar-popup {
-                top: 50px; left: 10px;
+                top: 50px; 
+                left: 10px;
                 width: 250px;
-                background: #f9f9f9; color: #333;
-                padding: 15px; border: 1px solid #ddd;
+                background: #f9f9f9; 
+                color: #333;
+                padding: 15px; 
+                border: 1px solid #ddd;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                display: none; flex-direction: column; align-items: center;
-                border-radius: 10px; z-index: 1000;
+                display: none; 
+                flex-direction: column; 
+                align-items: center;
+                border-radius: 10px; 
+                z-index: 1000;
                 font-family: Arial, sans-serif;
             }
 
