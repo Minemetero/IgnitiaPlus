@@ -1,0 +1,35 @@
+{
+    "description": "Enhance your study experience with IgnitiaPlus",
+    "manifest_version": 3,
+    "name": "IgnitiaPlus",
+    "version": "1.4.2",
+
+    "permissions": [
+        "storage",
+        "activeTab",
+        "webNavigation",
+        "scripting"
+    ],
+
+    "content_scripts": [
+        {
+            "matches": ["*://*.ignitiaschools.com/*", "*://ignitiaschools.com/*" ],
+            "js": ["darkreader.js", "math.min.js", "IgnitiaPlus.js"]
+        }
+    ],
+
+    "icons": {
+        "48": "icon.png"
+    },
+
+    "host_permissions": [
+        "*://*.ignitiaschools.com/*"
+    ],
+
+
+
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": "icon.png"
+    }
+}
