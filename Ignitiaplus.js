@@ -659,7 +659,16 @@
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', opacity: '0', animation: 'fadeIn 1s forwards'
         });
         quoteContainer.textContent = quote;
+
         document.body.appendChild(quoteContainer);
+
+        const loginForm = document.querySelector('.login-form');
+        if (loginForm) loginForm.style.display = 'none';
+
+        setTimeout(() => {
+            //quoteContainer.remove();
+            if (loginForm) loginForm.style.display = 'block';
+        }, 5000);
     }
 
     /*** Logout but Better Postion (Credit:BurdenOwl) <- this guys doesn't help me that much... but fine he designed the UI***/
