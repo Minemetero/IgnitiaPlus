@@ -226,8 +226,10 @@
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
         const footerElement = document.getElementById('footer');
+        const loginError = document.querySelector('.login-error.alert.alert-error');
         if (signOutElement) signOutElement.remove();
         if (footerElement) footerElement.remove();
+        if (loginError) loginError.remove();
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
