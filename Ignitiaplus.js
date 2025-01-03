@@ -226,10 +226,8 @@
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
         const footerElement = document.getElementById('footer');
-        const loginError = document.querySelector('.login-error.alert.alert-error');
         if (signOutElement) signOutElement.remove();
         if (footerElement) footerElement.remove();
-        if (loginError) loginError.remove();
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
@@ -670,7 +668,14 @@
         setTimeout(() => {
             //quoteContainer.remove();
             if (loginForm) loginForm.style.display = 'block';
-        }, 5000);
+        }, 2500);
+    }
+
+    function removeLoginError() {
+        const loginError = document.querySelector('.login-error.alert.alert-error');
+        if (loginError) {
+            loginError.remove();
+        }
     }
 
     /*** Logout but Better Postion (Credit:BurdenOwl) <- this guys doesn't help me that much... but fine he designed the UI***/
@@ -696,6 +701,7 @@
         injectCSS();
         if (window.location.pathname === '/owsoo/login/auth') {
             await loadAndDisplayQuote();
+            removeLoginError();
         } else {
             modifyPageHead();
             removeUnwantedElements();
