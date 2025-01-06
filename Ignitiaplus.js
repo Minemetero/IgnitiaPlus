@@ -149,11 +149,16 @@
 
             /* Dark Reader Toggle */
             #dark-reader-toggle {
-                position: fixed; bottom: 20px; left: 20px;
-                z-index: 10000; padding: 10px;
-                background-color: rgba(0,0,0,0.5);
-                color: white; border-radius: 50%;
-                cursor: pointer; font-size: 20px;
+                position: fixed; 
+                bottom: 10px; 
+                left: 10px;
+                z-index: 10000; 
+                padding: 10px;
+                background-color: transparent;
+                color: white; 
+                border-radius: 50%;
+                cursor: pointer; 
+                font-size: 20px;
                 text-align: center;
             }
 
