@@ -179,6 +179,24 @@
                 transform: scale(1.1);
             }
 
+            #container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 2px;
+            }
+
+            #resetButton {
+                margin-left: 10px;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 5px 10px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
             /* Dark Reader Toggle */
             #dark-reader-toggle {
                 position: fixed; 
@@ -697,10 +715,7 @@
         const resetButton = createResetButton(widget);
 
         const container = document.createElement('div');
-        container.style.display = 'flex';
-        container.style.alignItems = 'center';
-        container.style.justifyContent = 'space-between';
-        container.style.marginBottom = '2px';
+        container.id = 'container';
 
         container.appendChild(checkbox);
         container.appendChild(label);
@@ -712,14 +727,7 @@
     function createResetButton(widget) {
         const resetButton = document.createElement('button');
         resetButton.textContent = 'Reset';
-        resetButton.style.marginLeft = '10px';
-        resetButton.style.backgroundColor = '#007BFF';
-        resetButton.style.color = 'white';
-        resetButton.style.border = 'none';
-        resetButton.style.borderRadius = '5px';
-        resetButton.style.padding = '5px 10px';
-        resetButton.style.cursor = 'pointer';
-        resetButton.style.transition = 'background-color 0.3s';
+        resetButton.id = 'resetButton';
 
         resetButton.addEventListener('click', () => {
             localStorage.removeItem(`${widget.id}Position`);
