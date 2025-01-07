@@ -43,34 +43,42 @@
             }
 
             #clockWidget {
-                bottom: 10px; right: 10px;
+                bottom: 10px;
+                right: 10px;
                 background-color: rgba(0, 0, 0, 0.5);
                 padding: 5px 10px;
                 cursor: move;
             }
 
             #timetableWidget {
-                bottom: 60px; left: 10px;
-                padding: 10px; overflow-y: auto;
+                bottom: 60px; 
+                left: 10px;
+                padding: 10px; 
+                overflow-y: auto;
             }
 
             #timetableWidget textarea {
                 width: 100%;
                 height: calc(100% - 40px);
-                background: transparent; color: white;
-                border: none; outline: none;
+                background: transparent; 
+                color: white;
+                border: none; 
+                outline: none;
                 resize: none;
                 margin-top: 5px;
             }
 
             #todoWidget {
-                bottom: 0px; left: 10px;
-                padding: 10px; overflow: auto;
+                bottom: 0px; 
+                left: 10px;
+                padding: 10px; 
+                overflow: auto;
             }
 
             #todoWidget ul {
                 list-style-type: none;
-                padding: 0; margin-top: 10px;
+                padding: 0; 
+                margin-top: 10px;
             }
 
             #todoWidget ul li {
@@ -83,15 +91,18 @@
 
             /* Resize Handles */
             .resize-handle {
-                width: 10px; height: 10px;
+                width: 10px; 
+                height: 10px;
                 background-color: rgba(255, 255, 255, 0.5);
                 position: absolute;
-                bottom: 0; right: 0;
+                bottom: 0; 
+                right: 0;
                 cursor: nwse-resize;
             }
 
             #todoWidget .resize-handle {
-                width: 15px; height: 15px;
+                width: 15px; 
+                height: 15px;
                 background-color: rgba(255, 255, 255, 0.7);
                 border-bottom-right-radius: 5px;
             }
@@ -115,13 +126,19 @@
             }
 
             #minimalist-toolbar-popup textarea {
-                width: 100%; background: #fff; color: #333;
-                border: 1px solid #ddd; border-radius: 5px;
-                padding: 10px; outline: none; resize: none;
+                width: 100%; 
+                background: #fff; 
+                color: #333;
+                border: 1px solid #ddd; 
+                border-radius: 5px;
+                padding: 10px; 
+                outline: none; 
+                resize: none;
             }
 
             #minimalist-calculator {
-                height: 50px; margin-bottom: 15px;
+                height: 50px; 
+                margin-bottom: 15px;
             }
 
             #minimalist-notes {
@@ -130,21 +147,36 @@
 
             #minimalist-toolbar-popup .toggle-widgets {
                 background-color: rgba(0,0,0,0.9);
-                color: white; padding: 10px;
-                border-radius: 5px; width: 100%;
+                color: white; 
+                padding: 10px;
+                border-radius: 5px; 
+                width: 100%;
                 margin-top: 10px;
-                display: flex; flex-direction: column;
+                display: flex; 
+                flex-direction: column;
             }
 
             /* Toolbar Toggle */
             #minimalist-toolbar-toggle {
-                position: fixed; top: 10px; left: 10px;
-                width: 50px; height: 50px;
-                background-color: #007BFF; color: #fff;
-                text-align: center; line-height: 50px;
-                border-radius: 50%; font-size: 20px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                z-index: 1001; cursor: pointer;
+                position: fixed; 
+                top: 10px; 
+                left: 10px;
+                width: 50px; 
+                height: 50px;
+                background: linear-gradient(135deg, #007BFF, #0056b3);
+                color: #fff;
+                text-align: center; 
+                line-height: 50px;
+                border-radius: 50%; 
+                font-size: 20px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                z-index: 1001; 
+                cursor: pointer;
+                transition: background 0.3s, transform 0.2s;
+            }
+            #minimalist-toolbar-toggle:hover {
+                background: linear-gradient(135deg, #0056b3, #007BFF);
+                transform: scale(1.1);
             }
 
             /* Dark Reader Toggle */
@@ -603,18 +635,47 @@
             const label = document.createElement('label');
             label.htmlFor = w.id;
             label.textContent = w.name;
-            label.style.marginBottom = '10px';
+            label.style.marginBottom = '5px';
             label.style.cursor = 'pointer';
 
             const container = document.createElement('div');
             container.style.display = 'flex';
             container.style.alignItems = 'center';
-            container.style.marginBottom = '5px';
+            container.style.justifyContent = 'space-between';
+            container.style.marginBottom = '2px';
 
             container.appendChild(checkbox);
             container.appendChild(label);
             toggleMenu.appendChild(container);
+
+            const resetButton = document.createElement('button');
+            resetButton.textContent = 'Reset';
+            resetButton.style.marginLeft = '10px';
+            resetButton.style.backgroundColor = '#007BFF';
+            resetButton.style.color = 'white';
+            resetButton.style.border = 'none';
+            resetButton.style.borderRadius = '5px';
+            resetButton.style.padding = '5px 10px';
+            resetButton.style.cursor = 'pointer';
+            resetButton.style.transition = 'background-color 0.3s';
+
+            resetButton.addEventListener('click', () => {
+                localStorage.removeItem(`${w.id}Position`);
+                localStorage.removeItem(`${w.id}Size`);
+                location.reload();
+            });
+
+            resetButton.addEventListener('mouseover', () => {
+                resetButton.style.backgroundColor = '#0056b3';
+            });
+            resetButton.addEventListener('mouseout', () => {
+                resetButton.style.backgroundColor = '#007BFF';
+            });
+
+            container.appendChild(resetButton);
         });
+
+        toggleMenu.style.marginBottom = '2px';
 
         toolbar.appendChild(toggleMenu);
         document.body.appendChild(toggleButton);
