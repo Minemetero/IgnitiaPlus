@@ -562,10 +562,30 @@
     }
 
     /*** Minimalist Toolbar ***/
-    function addSoberMinibar() {
+    function addMinibar() {
+        const toolbar = createToolbar();
+        const toggleButton = createToggleButton(toolbar);
+        const developerName = createDeveloperName();
+        const calculator = createCalculator();
+        const notes = createNotes();
+        const toggleMenu = createToggleMenu();
+
+        toolbar.appendChild(developerName);
+        toolbar.appendChild(calculator);
+        toolbar.appendChild(notes);
+        toolbar.appendChild(toggleMenu);
+
+        document.body.appendChild(toggleButton);
+        document.body.appendChild(toolbar);
+    }
+
+    function createToolbar() {
         const toolbar = document.createElement('div');
         toolbar.id = 'minimalist-toolbar-popup';
+        return toolbar;
+    }
 
+    function createToggleButton(toolbar) {
         const toggleButton = document.createElement('div');
         toggleButton.id = 'minimalist-toolbar-toggle';
 
@@ -573,29 +593,37 @@
         toggleButton.style.justifyContent = "center";
         toggleButton.style.alignItems = "center";
         toggleButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24" style="display: block; margin: auto;">
-          <path fill="white" d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"></path>
-        </svg>`;
-        
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24" style="display: block; margin: auto;">
+              <path fill="white" d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"></path>
+            </svg>`;
+
         toggleButton.addEventListener('click', () => {
             toolbar.style.display = (toolbar.style.display === 'none') ? 'flex' : 'none';
         });
 
+        return toggleButton;
+    }
+
+    function createDeveloperName() {
         const developerName = document.createElement('div');
         developerName.textContent = 'By Minemetero';
         developerName.style.fontWeight = 'bold';
         developerName.style.marginBottom = '15px';
-        toolbar.appendChild(developerName);
+        return developerName;
+    }
 
+    function createCalculator() {
         const calculator = document.createElement('textarea');
         calculator.id = 'minimalist-calculator';
         calculator.placeholder = 'Calculator (press Enter to evaluate)';
+
         calculator.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 try {
-                    let input = calculator.value.trim();
+                    const input = calculator.value.trim();
                     let result;
+
                     if (input.startsWith('sqrt(') && input.endsWith(')')) {
                         const number = input.slice(5, -1);
                         result = math.sqrt(math.evaluate(number));
@@ -605,21 +633,31 @@
                     } else {
                         result = math.evaluate(input);
                     }
+
                     calculator.value = `${result}`;
                 } catch {
                     calculator.value = 'Error!';
                 }
             }
         });
-        toolbar.appendChild(calculator);
 
+        return calculator;
+    }
+
+    function createNotes() {
         const notes = document.createElement('textarea');
         notes.id = 'minimalist-notes';
         notes.placeholder = 'Your Notes...';
         notes.value = localStorage.getItem('minimalistNotes') || '';
-        notes.addEventListener('input', () => localStorage.setItem('minimalistNotes', notes.value));
-        toolbar.appendChild(notes);
 
+        notes.addEventListener('input', () => {
+            localStorage.setItem('minimalistNotes', notes.value);
+        });
+
+        return notes;
+    }
+
+    function createToggleMenu() {
         const toggleMenu = document.createElement('div');
         toggleMenu.className = 'toggle-widgets';
 
@@ -629,65 +667,74 @@
             { name: 'Todo List', id: 'todoWidget', init: addTodoList }
         ];
 
-        widgets.forEach(w => {
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = w.id;
-            checkbox.checked = JSON.parse(localStorage.getItem(w.id) || 'true');
-            checkbox.addEventListener('change', () => {
-                localStorage.setItem(w.id, checkbox.checked);
-                if (checkbox.checked) w.init();
-                else document.getElementById(w.id)?.remove();
-            });
-
-            const label = document.createElement('label');
-            label.htmlFor = w.id;
-            label.textContent = w.name;
-            label.style.marginBottom = '5px';
-            label.style.cursor = 'pointer';
-
-            const container = document.createElement('div');
-            container.style.display = 'flex';
-            container.style.alignItems = 'center';
-            container.style.justifyContent = 'space-between';
-            container.style.marginBottom = '2px';
-
-            container.appendChild(checkbox);
-            container.appendChild(label);
+        widgets.forEach(widget => {
+            const container = createWidgetContainer(widget);
             toggleMenu.appendChild(container);
-
-            const resetButton = document.createElement('button');
-            resetButton.textContent = 'Reset';
-            resetButton.style.marginLeft = '10px';
-            resetButton.style.backgroundColor = '#007BFF';
-            resetButton.style.color = 'white';
-            resetButton.style.border = 'none';
-            resetButton.style.borderRadius = '5px';
-            resetButton.style.padding = '5px 10px';
-            resetButton.style.cursor = 'pointer';
-            resetButton.style.transition = 'background-color 0.3s';
-
-            resetButton.addEventListener('click', () => {
-                localStorage.removeItem(`${w.id}Position`);
-                localStorage.removeItem(`${w.id}Size`);
-                location.reload();
-            });
-
-            resetButton.addEventListener('mouseover', () => {
-                resetButton.style.backgroundColor = '#0056b3';
-            });
-            resetButton.addEventListener('mouseout', () => {
-                resetButton.style.backgroundColor = '#007BFF';
-            });
-
-            container.appendChild(resetButton);
         });
 
         toggleMenu.style.marginBottom = '2px';
+        return toggleMenu;
+    }
 
-        toolbar.appendChild(toggleMenu);
-        document.body.appendChild(toggleButton);
-        document.body.appendChild(toolbar);
+    function createWidgetContainer(widget) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = widget.id;
+        checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
+
+        checkbox.addEventListener('change', () => {
+            localStorage.setItem(widget.id, checkbox.checked);
+            if (checkbox.checked) widget.init();
+            else document.getElementById(widget.id)?.remove();
+        });
+
+        const label = document.createElement('label');
+        label.htmlFor = widget.id;
+        label.textContent = widget.name;
+        label.style.marginBottom = '5px';
+        label.style.cursor = 'pointer';
+
+        const resetButton = createResetButton(widget);
+
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'space-between';
+        container.style.marginBottom = '2px';
+
+        container.appendChild(checkbox);
+        container.appendChild(label);
+        container.appendChild(resetButton);
+
+        return container;
+    }
+
+    function createResetButton(widget) {
+        const resetButton = document.createElement('button');
+        resetButton.textContent = 'Reset';
+        resetButton.style.marginLeft = '10px';
+        resetButton.style.backgroundColor = '#007BFF';
+        resetButton.style.color = 'white';
+        resetButton.style.border = 'none';
+        resetButton.style.borderRadius = '5px';
+        resetButton.style.padding = '5px 10px';
+        resetButton.style.cursor = 'pointer';
+        resetButton.style.transition = 'background-color 0.3s';
+
+        resetButton.addEventListener('click', () => {
+            localStorage.removeItem(`${widget.id}Position`);
+            localStorage.removeItem(`${widget.id}Size`);
+            location.reload();
+        });
+
+        resetButton.addEventListener('mouseover', () => {
+            resetButton.style.backgroundColor = '#0056b3';
+        });
+        resetButton.addEventListener('mouseout', () => {
+            resetButton.style.backgroundColor = '#007BFF';
+        });
+
+        return resetButton;
     }
 
     /*** Inspirational Quote ***/
@@ -781,7 +828,7 @@
             removeUnwantedElements();
             addRefreshWarning();
             await createDarkReaderToggle();
-            addSoberMinibar();
+            addMinibar();
             logOut();
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
