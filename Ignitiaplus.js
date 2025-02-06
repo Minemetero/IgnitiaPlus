@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.4.4
+// @version      1.4.5
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -376,21 +376,16 @@
         clockWidget = document.createElement('div');
         clockWidget.id = 'clockWidget';
 
-        const resizeHandle = document.createElement('div');
-        resizeHandle.className = 'resize-handle';
-
         function updateClock() {
             const now = new Date();
             const h = now.getHours().toString().padStart(2, '0');
             const m = now.getMinutes().toString().padStart(2, '0');
             const s = now.getSeconds().toString().padStart(2, '0');
             clockWidget.textContent = `${h}:${m}:${s}`;
-            clockWidget.appendChild(resizeHandle);
         }
 
-        let isDragging = false, isResizing = false, offsetX, offsetY;
+        let isDragging = false, offsetX, offsetY;
         clockWidget.addEventListener('mousedown', (e) => {
-            if (e.target === resizeHandle) return;
             isDragging = true;
             offsetX = e.clientX - clockWidget.offsetLeft;
             offsetY = e.clientY - clockWidget.offsetTop;
@@ -404,12 +399,6 @@
                 newY = Math.max(0, Math.min(newY, window.innerHeight - clockWidget.offsetHeight));
                 clockWidget.style.left = `${newX}px`;
                 clockWidget.style.top = `${newY}px`;
-            } else if (isResizing) {
-                const newWidth = e.clientX - clockWidget.getBoundingClientRect().left;
-                const newHeight = e.clientY - clockWidget.getBoundingClientRect().top;
-                clockWidget.style.width = `${newWidth}px`;
-                clockWidget.style.height = `${newHeight}px`;
-                localStorage.setItem('clockWidgetSize', JSON.stringify({ width: clockWidget.style.width, height: clockWidget.style.height }));
             }
         });
 
@@ -418,19 +407,12 @@
                 isDragging = false;
                 localStorage.setItem('clockWidgetPosition', JSON.stringify({ left: clockWidget.style.left, top: clockWidget.style.top }));
             }
-            if (isResizing) isResizing = false;
-        });
-
-        resizeHandle.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            e.preventDefault();
-            e.stopPropagation();
         });
 
         updateClock();
         setInterval(updateClock, 1000);
         document.body.appendChild(clockWidget);
-        loadSavedPositionAndSize(clockWidget, 'clockWidgetPosition', 'clockWidgetSize');
+        loadSavedPositionAndSize(clockWidget, 'clockWidgetPosition', null);
     }
 
     function addClassTimetable() {
@@ -910,7 +892,7 @@
             await createDarkReaderToggle();
             addMinibar();
             logOut();
-            addContributorTab();
+            //addContributorTab();
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
