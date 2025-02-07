@@ -882,7 +882,7 @@
     /*** Initialization ***/
     async function init() {
         injectCSS();
-        if (window.location.pathname === '/owsoo/login/auth') {
+        if (window.location.pathname.startsWith('/owsoo/login/auth')) {
             await loadAndDisplayQuote();
             removeLoginError();
         } else {
