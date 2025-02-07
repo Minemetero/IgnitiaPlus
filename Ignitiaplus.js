@@ -286,6 +286,23 @@
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
+    function logOut() { /***(Credit:BurdenOwl)***/
+        const passwordResetForm = document.getElementById("passwordResetFormWrapper");
+        if (!passwordResetForm) return;
+
+        const signOutButton = document.createElement('button');
+        signOutButton.id = 'signOut';
+        signOutButton.className = 'btn btn-default btn-block';
+        signOutButton.textContent = 'Sign Out';
+
+        passwordResetForm.appendChild(signOutButton);
+
+        signOutButton.addEventListener('click', () => {
+            const logoutUrl = `${window.location.origin}/owsoo/j_spring_security_logout`;
+            window.location.href = logoutUrl;
+        });
+    }
+
     function addRefreshWarning() {
         if (window.location.href.includes('/owsoo/home')) return;
         let warningActive = false;
@@ -859,24 +876,6 @@
         if (loginError) {
             loginError.remove();
         }
-    }
-
-    /*** Logout but Better Postion (Credit:BurdenOwl) <- this guys doesn't help me that much... but fine he designed the UI***/
-    function logOut() {
-        const passwordResetForm = document.getElementById("passwordResetFormWrapper");
-        if (!passwordResetForm) return;
-
-        const signOutButton = document.createElement('button');
-        signOutButton.id = 'signOut';
-        signOutButton.className = 'btn btn-default btn-block';
-        signOutButton.textContent = 'Sign Out';
-
-        passwordResetForm.appendChild(signOutButton);
-
-        signOutButton.addEventListener('click', () => {
-            const logoutUrl = `${window.location.origin}/owsoo/j_spring_security_logout`;
-            window.location.href = logoutUrl;
-        });
     }
 
     /*** Initialization ***/
