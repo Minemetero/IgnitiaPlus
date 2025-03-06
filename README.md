@@ -4,7 +4,7 @@
 
 ## 🌟 Features
 
-### 🕒 Customizable Clock
+### 🕒 A Clock
 You wasted ten more minutes...
 
 ### 🎨 Theme Switcher
@@ -26,10 +26,16 @@ The Sober Minibar is a versatile toolbar that provides quick access to several t
 - **Developer Credit**: I need my name on it so I feel honored.
 - **Calculator Tool**: A simple calculator that evaluates expressions when you press Enter. (Big Thanks to [MathJs](https://mathjs.org))
 - **Notes Section**: Who knows what you're going to do with it?
-- **Toggle Menu**: Allows you to enable or disable widgets like the Clock, Class Timetable, and Todo List.
+
+### 🎛️ Toggle Menu
+Allows you to enable or disable widgets like the Clock, Class Timetable, Todo List, Quote and Footer settings.  
+<sub><sup> [#10](https://github.com/Minemetero/IgnitiaPlus/issues/10) it's now a independence :D</sup></sub>
 
 ### 🌈 Inspirational Quote of the Day
 Idk if it's going to help u, I feel boring, so I made this feature.
+
+### 👣 Footer
+Modified it to make it look better; stay at the bottom, or you could remove it, or you could keep it like the original one.  
 
 ### ⚠️ Refresh Warning
 It's annoying, we all know; now we fixed it!
@@ -49,7 +55,7 @@ This project is licensed under the Apache-2.0 License.
 
 ## 👨‍💻 Author
 
-Developed by Minemetero.
+Developed by Minemetero and BurdenOwl.
 
 ## 💬 Feedback and Support
 If you have suggestions (I'm lazy~~), hummm, you could just leave a comment, I guess. (mimemetero0@outlook.com)
