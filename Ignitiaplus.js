@@ -10,7 +10,7 @@
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
-// @require      https://cdn.jsdelivr.net/npm/mathjs@14.2.1/lib/browser/math.min.js
+// @require      https://cdn.jsdelivr.net/npm/mathjs@14.3.0/lib/browser/math.min.js
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
