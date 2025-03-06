@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.5.0
+// @version      2.0.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -662,7 +662,7 @@
     }
 
     /*** Widgets ***/
-    function testAndQuizStopWatch() {
+    function testAndQuizStopWatch() { //Credit:BurdenOwl
         const assignmentTab = document.querySelector('.assignmentTitle.assignment-title-text');
         if (!assignmentTab) return;
 
@@ -671,12 +671,11 @@
 
         if (!window.location.href.includes('/owsoo/studentAssignment')) return;
 
-        // Correct condition (if "Quiz" OR "Test")
-        // if (!(assignmentText.textContent.trim() === "Quiz" || assignmentText.textContent.trim() === "Test")) return;
+        if (assignmentText.textContent.trim() === "Quiz" || assignmentText.textContent.trim() === "Test") return;
 
-        if (assignmentText.textContent.trim() == "Assignment") {
-            console.log("eeeeeeee");
-        };
+        // if (assignmentText.textContent.trim() == "Assignment") {
+        //     console.log("eeeeeeee");
+        // };
 
         let StopWatchWidget = document.createElement('div');
         StopWatchWidget.id = 'StopWatchWidget';
