@@ -186,22 +186,46 @@
                 margin-bottom: 2px;
             }
 
+            /* Toggle Menu */
+                .toggle-widgets {
+                z-index: 9999;
+                background-color: #333;
+                color: #fff;
+                padding: 10px;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: column;
+                min-width: 150px;
+                /* Optionally: max-height + scroll if needed */
+                max-height: 200px;
+                overflow-y: auto;
+            }
+
+            .widget-container {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+
             #resetButton {
-                margin-left: 10px;
+                margin-left: 8px;
                 background-color: #007BFF;
                 color: white;
                 border: none;
                 border-radius: 5px;
-                padding: 5px 10px;
+                padding: 4px 8px;
                 cursor: pointer;
                 transition: background-color 0.3s;
+                font-size: 12px;
             }
 
             /* Dark Reader Toggle */
             #dark-reader-toggle {
                 position: fixed; 
                 bottom: 10px; 
-                left: 10px;
+                left: 70px;
                 z-index: 10000; 
                 padding: 10px;
                 background-color: transparent;
@@ -277,12 +301,29 @@
         }
     }
 
+    function adjustFooter() {
+        const footerElement = document.getElementById('footer');
+        if (!footerElement) return;
+
+        // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
+        if (document.body.scrollHeight <= window.innerHeight) {
+            footerElement.style.position = 'fixed';
+            footerElement.style.bottom = '0';
+            footerElement.style.left = '0';
+            footerElement.style.right = '0';
+        } else {
+            // Otherwise, let the site's own CSS take over.
+            footerElement.style.position = '';
+            footerElement.style.bottom = '';
+            footerElement.style.left = '';
+            footerElement.style.right = '';
+        }
+    }
+
     function removeUnwantedElements() {
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
-        const footerElement = document.getElementById('footer');
         if (signOutElement) signOutElement.remove();
-        if (footerElement) footerElement.remove();
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
@@ -387,6 +428,127 @@
         document.body.appendChild(tooltip);
         navTabs.appendChild(contributorTab);
     }
+
+    /*** Widgets Manager ***/
+    function createWidgetToggleCog() {
+        const cogContainer = document.createElement('div');
+        cogContainer.id = 'widget-toggle-cog-container';
+        Object.assign(cogContainer.style, {
+            position: 'fixed',
+            bottom: '10px',
+            left: '10px',    // Cog at bottom-left corner
+            zIndex: '10000'
+        });
+
+        // Create the cog icon
+        const cogIcon = document.createElement('div');
+        cogIcon.id = 'widget-toggle-cog';
+        Object.assign(cogIcon.style, {
+            padding: '10px',
+            backgroundColor: 'transparent',
+            color: 'white',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            fontSize: '20px',
+            textAlign: 'center'
+        });
+        cogIcon.textContent = '⚙️';
+
+        // Build the dropdown container with checkboxes
+        const toggleMenu = createToggleMenu();
+        // Show the menu ABOVE the cog:
+        Object.assign(toggleMenu.style, {
+            position: 'absolute',
+            bottom: '100%',    // place above the cog
+            left: '0',
+            marginBottom: '5px',
+            display: 'none'    // initially hidden
+        });
+
+        // Append icon + dropdown to container
+        cogContainer.appendChild(cogIcon);
+        cogContainer.appendChild(toggleMenu);
+
+        // Toggle the dropdown’s visibility on cog click
+        cogIcon.addEventListener('click', () => {
+            toggleMenu.style.display =
+                (toggleMenu.style.display === 'none') ? 'flex' : 'none';
+        });
+
+        // Finally, append the cog container to body
+        document.body.appendChild(cogContainer);
+    }
+
+    function createToggleMenu() {
+        const toggleMenu = document.createElement('div');
+        toggleMenu.className = 'toggle-widgets';
+
+        const widgets = [
+            { name: 'Clock', id: 'clockWidget', init: addCustomizableClock },
+            { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
+            { name: 'Todo List', id: 'todoWidget', init: addTodoList }
+        ];
+
+        widgets.forEach(widget => {
+            const container = createWidgetContainer(widget);
+            toggleMenu.appendChild(container);
+        });
+
+        toggleMenu.style.marginBottom = '2px';
+        return toggleMenu;
+    }
+
+    function createWidgetContainer(widget) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = widget.id;
+        checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
+
+        checkbox.addEventListener('change', () => {
+            localStorage.setItem(widget.id, checkbox.checked);
+            if (checkbox.checked) widget.init();
+            else document.getElementById(widget.id)?.remove();
+        });
+
+        const label = document.createElement('label');
+        label.htmlFor = widget.id;
+        label.textContent = widget.name;
+        label.style.cursor = 'pointer';
+
+        const resetButton = createResetButton(widget);
+
+        // Use a class name to match .widget-container in CSS
+        const container = document.createElement('div');
+        container.className = 'widget-container';
+
+        container.appendChild(checkbox);
+        container.appendChild(label);
+        container.appendChild(resetButton);
+
+        return container;
+    }
+
+    function createResetButton(widget) {
+        const resetButton = document.createElement('button');
+        resetButton.textContent = 'Reset';
+        resetButton.id = 'resetButton';
+
+        resetButton.addEventListener('click', () => {
+            localStorage.removeItem(`${widget.id}Position`);
+            localStorage.removeItem(`${widget.id}Size`);
+            location.reload();
+        });
+
+        resetButton.addEventListener('mouseover', () => {
+            resetButton.style.backgroundColor = '#0056b3';
+        });
+        resetButton.addEventListener('mouseout', () => {
+            resetButton.style.backgroundColor = '#007BFF';
+        });
+
+        return resetButton;
+    }
+
 
     /*** Widgets ***/
     function addCustomizableClock() {
@@ -657,12 +819,10 @@
         const developerName = createDeveloperName();
         const calculator = createCalculator();
         const notes = createNotes();
-        const toggleMenu = createToggleMenu();
 
         toolbar.appendChild(developerName);
         toolbar.appendChild(calculator);
         toolbar.appendChild(notes);
-        toolbar.appendChild(toggleMenu);
 
         document.body.appendChild(toggleButton);
         document.body.appendChild(toolbar);
@@ -746,76 +906,6 @@
         return notes;
     }
 
-    function createToggleMenu() {
-        const toggleMenu = document.createElement('div');
-        toggleMenu.className = 'toggle-widgets';
-
-        const widgets = [
-            { name: 'Clock', id: 'clockWidget', init: addCustomizableClock },
-            { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
-            { name: 'Todo List', id: 'todoWidget', init: addTodoList }
-        ];
-
-        widgets.forEach(widget => {
-            const container = createWidgetContainer(widget);
-            toggleMenu.appendChild(container);
-        });
-
-        toggleMenu.style.marginBottom = '2px';
-        return toggleMenu;
-    }
-
-    function createWidgetContainer(widget) {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = widget.id;
-        checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
-
-        checkbox.addEventListener('change', () => {
-            localStorage.setItem(widget.id, checkbox.checked);
-            if (checkbox.checked) widget.init();
-            else document.getElementById(widget.id)?.remove();
-        });
-
-        const label = document.createElement('label');
-        label.htmlFor = widget.id;
-        label.textContent = widget.name;
-        label.style.marginBottom = '5px';
-        label.style.cursor = 'pointer';
-
-        const resetButton = createResetButton(widget);
-
-        const container = document.createElement('div');
-        container.id = 'container';
-
-        container.appendChild(checkbox);
-        container.appendChild(label);
-        container.appendChild(resetButton);
-
-        return container;
-    }
-
-    function createResetButton(widget) {
-        const resetButton = document.createElement('button');
-        resetButton.textContent = 'Reset';
-        resetButton.id = 'resetButton';
-
-        resetButton.addEventListener('click', () => {
-            localStorage.removeItem(`${widget.id}Position`);
-            localStorage.removeItem(`${widget.id}Size`);
-            location.reload();
-        });
-
-        resetButton.addEventListener('mouseover', () => {
-            resetButton.style.backgroundColor = '#0056b3';
-        });
-        resetButton.addEventListener('mouseout', () => {
-            resetButton.style.backgroundColor = '#007BFF';
-        });
-
-        return resetButton;
-    }
-
     /*** Inspirational Quote ***/
     async function loadAndDisplayQuote() {
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
@@ -889,8 +979,10 @@
             removeUnwantedElements();
             addRefreshWarning();
             await createDarkReaderToggle();
+            createWidgetToggleCog()
             addMinibar();
             logOut();
+            adjustFooter()
             //addContributorTab();
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
