@@ -436,7 +436,7 @@
         Object.assign(cogContainer.style, {
             position: 'fixed',
             bottom: '10px',
-            left: '10px',    // Cog at bottom-left corner
+            left: '10px',
             zIndex: '10000'
         });
 
@@ -456,26 +456,22 @@
 
         // Build the dropdown container with checkboxes
         const toggleMenu = createToggleMenu();
-        // Show the menu ABOVE the cog:
         Object.assign(toggleMenu.style, {
             position: 'absolute',
-            bottom: '100%',    // place above the cog
+            bottom: '100%',
             left: '0',
             marginBottom: '5px',
-            display: 'none'    // initially hidden
+            display: 'none'
         });
 
-        // Append icon + dropdown to container
         cogContainer.appendChild(cogIcon);
         cogContainer.appendChild(toggleMenu);
 
-        // Toggle the dropdown’s visibility on cog click
         cogIcon.addEventListener('click', () => {
             toggleMenu.style.display =
                 (toggleMenu.style.display === 'none') ? 'flex' : 'none';
         });
 
-        // Finally, append the cog container to body
         document.body.appendChild(cogContainer);
     }
 
@@ -499,32 +495,35 @@
     }
 
     function createWidgetContainer(widget) {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = widget.id;
-        checkbox.checked = JSON.parse(localStorage.getItem(widget.id) || 'true');
+        let isEnabled = JSON.parse(localStorage.getItem(widget.id) || 'true');
+        // if (isEnabled && !document.getElementById(widget.id)) {
+        //     widget.init();
+        // }
 
-        checkbox.addEventListener('change', () => {
-            localStorage.setItem(widget.id, checkbox.checked);
-            if (checkbox.checked) widget.init();
-            else document.getElementById(widget.id)?.remove();
+        const label = document.createElement('span');
+        label.textContent = widget.name;
+        label.style.marginBottom = '5px';
+        label.style.cursor = 'pointer';
+    
+        // When the user clicks the label, toggle enable/disable:
+        label.addEventListener('click', () => {
+            isEnabled = !isEnabled;
+            localStorage.setItem(widget.id, isEnabled);
+    
+            if (isEnabled) {
+                widget.init();
+            } else {
+                document.getElementById(widget.id)?.remove();
+            }
         });
 
-        const label = document.createElement('label');
-        label.htmlFor = widget.id;
-        label.textContent = widget.name;
-        label.style.cursor = 'pointer';
-
         const resetButton = createResetButton(widget);
-
-        // Use a class name to match .widget-container in CSS
         const container = document.createElement('div');
-        container.className = 'widget-container';
-
-        container.appendChild(checkbox);
+        container.className = 'widget-container'; 
+    
         container.appendChild(label);
         container.appendChild(resetButton);
-
+    
         return container;
     }
 
