@@ -330,25 +330,6 @@
         }
     }
 
-    function adjustFooter() {
-        const footerElement = document.getElementById('footer');
-        if (!footerElement) return;
-
-        // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
-        if (document.body.scrollHeight <= window.innerHeight) {
-            footerElement.style.position = 'fixed';
-            footerElement.style.bottom = '0';
-            footerElement.style.left = '0';
-            footerElement.style.right = '0';
-        } else {
-            // Otherwise, let the site's own CSS take over.
-            footerElement.style.position = '';
-            footerElement.style.bottom = '';
-            footerElement.style.left = '';
-            footerElement.style.right = '';
-        }
-    }
-
     function removeUnwantedElements() {
         const signOutElement = document.getElementById('logout');
         const bannerTabDividers = document.querySelectorAll('.bannerTabDivider');
@@ -458,6 +439,97 @@
         navTabs.appendChild(contributorTab);
     }
 
+    /** Functions for Footer ***/
+    function createFooterModeSelector() {
+        // Container
+        const container = document.createElement('div');
+        container.className = 'widget-container';
+    
+        // Label
+        const label = document.createElement('span');
+        label.textContent = 'Footer Mode';
+        label.style.flex = "1"; // let the label fill available space
+        label.style.fontSize = "16px";
+    
+        // Dropdown
+        const select = document.createElement('select');
+        select.style.width = "120px";
+        select.style.padding = "3px";
+        select.style.borderRadius = "3px";
+        select.style.border = "1px solid #ddd";
+        select.style.fontSize = "14px";
+        
+        const modes = [
+            { value: 'none',     label: 'Do Nothing' },
+            { value: 'remove',   label: 'Remove Footer' },
+            { value: 'modified', label: 'Modified Footer' },
+        ];
+    
+        // Load saved mode (default "none")
+        let savedMode = localStorage.getItem('footerMode') || 'none';
+
+        modes.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.value;
+            option.textContent = m.label;
+            select.appendChild(option);
+        });
+        select.value = savedMode;
+
+        select.addEventListener('change', () => {
+            const newMode = select.value;
+            localStorage.setItem('footerMode', newMode);
+            applyFooterMode(newMode);
+        });
+
+        container.appendChild(label);
+        container.appendChild(select);
+        return container;
+    }       
+
+    function applyFooterMode(mode) {
+        const footerElement = document.getElementById('footer');
+        if (!footerElement) return;
+    
+        switch (mode) {
+            case 'remove':
+                footerElement.style.display = 'none';
+                break;
+    
+            case 'modified':
+                footerElement.style.display = '';
+                adjustFooter();
+                break;
+    
+            default:
+                footerElement.style.display = '';
+                footerElement.style.position = '';
+                footerElement.style.bottom = '';
+                footerElement.style.left = '';
+                footerElement.style.right = '';
+                break;
+        }
+    }    
+
+    function adjustFooter() {
+        const footerElement = document.getElementById('footer');
+        if (!footerElement) return;
+
+        // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
+        if (document.body.scrollHeight <= window.innerHeight) {
+            footerElement.style.position = 'fixed';
+            footerElement.style.bottom = '0';
+            footerElement.style.left = '0';
+            footerElement.style.right = '0';
+        } else {
+            // Otherwise, let the site's own CSS take over.
+            footerElement.style.position = '';
+            footerElement.style.bottom = '';
+            footerElement.style.left = '';
+            footerElement.style.right = '';
+        }
+    }
+
     /*** Widgets Manager ***/
     function createWidgetToggleCog() {
         const cogContainer = document.createElement('div');
@@ -519,6 +591,9 @@
             const container = createWidgetContainer(widget);
             toggleMenu.appendChild(container);
         });
+
+        const footerModeSelector = createFooterModeSelector();
+        toggleMenu.appendChild(footerModeSelector);
 
         toggleMenu.style.marginBottom = '2px';
         return toggleMenu;
@@ -1006,8 +1081,9 @@
             createWidgetToggleCog()
             addMinibar();
             logOut();
-            adjustFooter()
             //addContributorTab();
+            const savedMode = localStorage.getItem('footerMode') || 'none';
+            applyFooterMode(savedMode);
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
