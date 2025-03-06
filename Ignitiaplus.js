@@ -924,6 +924,11 @@
 
     /*** Inspirational Quote ***/
     async function addInspirationalQuoteWidget() {
+        // Only display the quote if the URL path starts with '/owsoo/login/auth'
+        if (!window.location.pathname.startsWith('/owsoo/login/auth')) {
+            return;
+        }
+        // Prevent duplicate display
         if (document.getElementById('quoteWidget')) return;
 
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
@@ -1009,7 +1014,7 @@
     async function init() {
         injectCSS();
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
-            await loadAndDisplayQuote();
+            if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
             removeLoginError();
         } else {
             modifyPageHead();
@@ -1025,7 +1030,6 @@
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
             if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
-            if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
         }
     }
 
