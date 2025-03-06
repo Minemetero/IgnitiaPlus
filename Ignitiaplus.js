@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      1.4.5
+// @version      1.5.0
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -504,12 +504,12 @@
         label.textContent = widget.name;
         label.style.marginBottom = '5px';
         label.style.cursor = 'pointer';
-    
+
         // When the user clicks the label, toggle enable/disable:
         label.addEventListener('click', () => {
             isEnabled = !isEnabled;
             localStorage.setItem(widget.id, isEnabled);
-    
+
             if (isEnabled) {
                 widget.init();
             } else {
@@ -519,11 +519,11 @@
 
         const resetButton = createResetButton(widget);
         const container = document.createElement('div');
-        container.className = 'widget-container'; 
-    
+        container.className = 'widget-container';
+
         container.appendChild(label);
         container.appendChild(resetButton);
-    
+
         return container;
     }
 
@@ -547,7 +547,6 @@
 
         return resetButton;
     }
-
 
     /*** Widgets ***/
     function addCustomizableClock() {
