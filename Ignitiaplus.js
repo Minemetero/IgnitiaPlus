@@ -509,7 +509,7 @@
         toggleMenu.className = 'toggle-widgets';
 
         const widgets = [
-            { name: 'Clock', id: 'clockWidget', init: addCustomizableClock },
+            { name: 'Clock', id: 'clockWidget', init: addClock },
             { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
             { name: 'Todo List', id: 'todoWidget', init: addTodoList },
             { name: 'Quote', id: 'quoteWidget', init: addInspirationalQuoteWidget }
@@ -572,7 +572,7 @@
     }
 
     /*** Widgets ***/
-    function addCustomizableClock() {
+    function addClock() {
         clockWidget = document.createElement('div');
         clockWidget.id = 'clockWidget';
         clockWidget.style.resize = "none";
@@ -1009,7 +1009,7 @@
             adjustFooter()
             //addContributorTab();
 
-            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
+            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
             if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
         }
