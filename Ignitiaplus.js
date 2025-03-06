@@ -175,21 +175,27 @@
                 border-radius: 8px;
                 display: flex;
                 flex-direction: column;
+                gap: 8px; 
                 min-width: 150px;
                 max-height: 200px;
                 overflow-y: auto;
             }
 
-            /* Each row in the dropdown */
             .widget-container {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                justify-content: space-between;
-                margin-bottom: 8px;
+                background-color: transparent;
+                border-radius: 4px;
             }
 
-            /* Reset button styling */
+            .widget-container span {
+                flex: 1;            /* occupy remaining horizontal space */
+                white-space: nowrap;/* prevent wrapping onto a second line */
+                font-size: 16px;    /* adjust as desired */
+            }
+
+            /* The Reset button */
             #resetButton {
                 margin-left: 8px;
                 background-color: #007BFF;
@@ -924,11 +930,9 @@
 
     /*** Inspirational Quote ***/
     async function addInspirationalQuoteWidget() {
-        // Only display the quote if the URL path starts with '/owsoo/login/auth'
         if (!window.location.pathname.startsWith('/owsoo/login/auth')) {
             return;
         }
-        // Prevent duplicate display
         if (document.getElementById('quoteWidget')) return;
 
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
@@ -960,46 +964,24 @@
         link.rel = 'stylesheet';
         document.head.appendChild(link);
 
+        // Create the quote container
         const quoteContainer = document.createElement('div');
         quoteContainer.id = 'quoteWidget';
         Object.assign(quoteContainer.style, {
-            position: 'fixed',
-            top: '50%',
-            right: '200px',
+            position: 'fixed', top: '50%', right: '200px',
             transform: 'translateY(-50%)',
             background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '15px',
-            fontFamily: '"Merriweather", serif',
-            fontSize: '22px',
-            lineHeight: '1.5',
-            zIndex: '1000',
-            maxWidth: '350px',
-            textAlign: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+            color: 'white', padding: '20px', borderRadius: '15px',
+            fontFamily: '"Merriweather", serif', fontSize: '22px',
+            lineHeight: '1.5', zIndex: '1000', maxWidth: '350px', textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', opacity: '0', animation: 'fadeIn 1s forwards'
         });
 
-        // Container for the quote text
+        // The quote text
         const quoteText = document.createElement('div');
         quoteText.textContent = quote;
-        quoteText.style.marginRight = '30px';
-
-        const closeButton = document.createElement('span');
-        closeButton.textContent = '✖';
-        Object.assign(closeButton.style, {
-            position: 'absolute',
-            top: '5px',
-            right: '10px',
-            cursor: 'pointer',
-            fontSize: '18px'
-        });
-        closeButton.addEventListener('click', () => {
-            quoteContainer.remove();
-        });
 
         quoteContainer.appendChild(quoteText);
-        quoteContainer.appendChild(closeButton);
         document.body.appendChild(quoteContainer);
     }
 
