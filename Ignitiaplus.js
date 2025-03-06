@@ -24,8 +24,13 @@
     function injectCSS() {
         const style = document.createElement('style');
         style.textContent = `
-            /* General Widget Styles */
-            #clockWidget, #timetableWidget, #todoWidget, #minimalist-toolbar-popup {
+            /* ======================================================
+            General Widget Styles
+            ====================================================== */
+            #clockWidget,
+            #timetableWidget,
+            #todoWidget,
+            #minimalist-toolbar-popup {
                 position: fixed;
                 background-color: rgba(0, 0, 0, 0.7);
                 color: white;
@@ -37,11 +42,16 @@
                 overflow: hidden;
             }
 
-            #clockWidget, #timetableWidget, #todoWidget {
+            #clockWidget,
+            #timetableWidget,
+            #todoWidget {
                 max-width: 90vw;
                 max-height: 90vh;
             }
 
+            /* ======================================================
+            Clock Widget
+            ====================================================== */
             #clockWidget {
                 bottom: 10px;
                 right: 10px;
@@ -50,34 +60,40 @@
                 cursor: move;
             }
 
+            /* ======================================================
+            Timetable Widget
+            ====================================================== */
             #timetableWidget {
-                bottom: 60px; 
+                bottom: 60px;
                 left: 10px;
-                padding: 10px; 
+                padding: 10px;
                 overflow-y: auto;
             }
 
             #timetableWidget textarea {
                 width: 100%;
                 height: calc(100% - 40px);
-                background: transparent; 
+                background: transparent;
                 color: white;
-                border: none; 
+                border: none;
                 outline: none;
                 resize: none;
                 margin-top: 5px;
             }
 
+            /* ======================================================
+            Todo Widget
+            ====================================================== */
             #todoWidget {
-                bottom: 0px; 
+                bottom: 0;
                 left: 10px;
-                padding: 10px; 
+                padding: 10px;
                 overflow: auto;
             }
 
             #todoWidget ul {
                 list-style-type: none;
-                padding: 0; 
+                padding: 0;
                 margin-top: 10px;
             }
 
@@ -86,58 +102,61 @@
                 cursor: pointer;
                 padding: 5px;
                 border-radius: 3px;
-                background-color: rgba(255,255,255,0.1);
+                background-color: rgba(255, 255, 255, 0.1);
             }
 
-            /* Resize Handles */
+            /* ======================================================
+            Resize Handles
+            ====================================================== */
             .resize-handle {
-                width: 10px; 
+                width: 10px;
                 height: 10px;
                 background-color: rgba(255, 255, 255, 0.5);
                 position: absolute;
-                bottom: 0; 
+                bottom: 0;
                 right: 0;
                 cursor: nwse-resize;
             }
 
             #todoWidget .resize-handle {
-                width: 15px; 
+                width: 15px;
                 height: 15px;
                 background-color: rgba(255, 255, 255, 0.7);
                 border-bottom-right-radius: 5px;
             }
 
-            /* Minimalist Toolbar */
+            /* ======================================================
+            Minimalist Toolbar Popup
+            ====================================================== */
             #minimalist-toolbar-popup {
-                top: 50px; 
+                top: 50px;
                 left: 10px;
                 width: 250px;
-                background: #f9f9f9; 
+                background: #f9f9f9;
                 color: #333;
-                padding: 15px; 
+                padding: 15px;
                 border: 1px solid #ddd;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                display: none; 
-                flex-direction: column; 
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                display: none;
+                flex-direction: column;
                 align-items: center;
-                border-radius: 10px; 
+                border-radius: 10px;
                 z-index: 1000;
-                font-family: Arial, sans-serif;
             }
 
             #minimalist-toolbar-popup textarea {
-                width: 100%; 
-                background: #fff; 
+                width: 100%;
+                background: #fff;
                 color: #333;
-                border: 1px solid #ddd; 
+                border: 1px solid #ddd;
                 border-radius: 5px;
-                padding: 10px; 
-                outline: none; 
+                padding: 10px;
+                outline: none;
                 resize: none;
             }
 
             #minimalist-calculator {
-                height: 50px; 
+                height: 50px;
                 margin-bottom: 15px;
             }
 
@@ -145,49 +164,10 @@
                 height: 100px;
             }
 
-            #minimalist-toolbar-popup .toggle-widgets {
-                background-color: rgba(0,0,0,0.9);
-                color: white; 
-                padding: 10px;
-                border-radius: 5px; 
-                width: 100%;
-                margin-top: 10px;
-                display: flex; 
-                flex-direction: column;
-            }
-
-            /* Toolbar Toggle */
-            #minimalist-toolbar-toggle {
-                position: fixed; 
-                top: 10px; 
-                left: 10px;
-                width: 50px; 
-                height: 50px;
-                background: linear-gradient(135deg, #007BFF, #0056b3);
-                color: #fff;
-                text-align: center; 
-                line-height: 50px;
-                border-radius: 50%; 
-                font-size: 20px;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                z-index: 1001; 
-                cursor: pointer;
-                transition: background 0.3s, transform 0.2s;
-            }
-            #minimalist-toolbar-toggle:hover {
-                background: linear-gradient(135deg, #0056b3, #007BFF);
-                transform: scale(1.1);
-            }
-
-            #container {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 2px;
-            }
-
-            /* Toggle Menu */
-                .toggle-widgets {
+            /* ======================================================
+            Toggle Menu Dropdown (from Cog)
+            ====================================================== */
+            .toggle-widgets {
                 z-index: 9999;
                 background-color: #333;
                 color: #fff;
@@ -196,11 +176,11 @@
                 display: flex;
                 flex-direction: column;
                 min-width: 150px;
-                /* Optionally: max-height + scroll if needed */
                 max-height: 200px;
                 overflow-y: auto;
             }
 
+            /* Each row in the dropdown */
             .widget-container {
                 display: flex;
                 flex-direction: row;
@@ -209,6 +189,7 @@
                 margin-bottom: 8px;
             }
 
+            /* Reset button styling */
             #resetButton {
                 margin-left: 8px;
                 background-color: #007BFF;
@@ -221,24 +202,66 @@
                 font-size: 12px;
             }
 
-            /* Dark Reader Toggle */
+            /* ======================================================
+            Dark Mode Toggle
+            ====================================================== */
             #dark-reader-toggle {
-                position: fixed; 
-                bottom: 10px; 
+                position: fixed;
+                bottom: 10px;
                 left: 70px;
-                z-index: 10000; 
+                z-index: 10000;
                 padding: 10px;
                 background-color: transparent;
-                color: white; 
+                color: white;
                 border-radius: 50%;
-                cursor: pointer; 
+                cursor: pointer;
                 font-size: 20px;
                 text-align: center;
             }
 
-            /* FadeIn Keyframe for Quote */
+            /* ======================================================
+            Toolbar Toggle (if used)
+            ====================================================== */
+            #minimalist-toolbar-toggle {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #007BFF, #0056b3);
+                color: #fff;
+                text-align: center;
+                line-height: 50px;
+                border-radius: 50%;
+                font-size: 20px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                cursor: pointer;
+                transition: background 0.3s, transform 0.2s;
+                }
+
+                #minimalist-toolbar-toggle:hover {
+                background: linear-gradient(135deg, #0056b3, #007BFF);
+                transform: scale(1.1);
+            }
+
+            /* ======================================================
+            Container for Widget Toggle Rows (if needed)
+            ====================================================== */
+            #container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 2px;
+            }
+
+            /* ======================================================
+            FadeIn Animation (for Quote)
+            ====================================================== */
             @keyframes fadeIn {
-                to { opacity: 1; }
+                to {
+                    opacity: 1;
+                }
             }
         `;
         document.head.appendChild(style);
