@@ -11,6 +11,7 @@
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
 // @require      https://cdn.jsdelivr.net/npm/mathjs@14.3.0/lib/browser/math.min.js
+// @require      https://cdn.jsdelivr.net/npm/mathjs@14.3.0/lib/browser/math.min.js
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
@@ -80,7 +81,9 @@
             ====================================================== */
             #timetableWidget {
                 bottom: 60px;
+                bottom: 60px;
                 left: 10px;
+                padding: 10px;
                 padding: 10px;
                 overflow-y: auto;
             }
@@ -89,7 +92,9 @@
                 width: 100%;
                 height: calc(100% - 40px);
                 background: transparent;
+                background: transparent;
                 color: white;
+                border: none;
                 border: none;
                 outline: none;
                 resize: none;
@@ -99,15 +104,21 @@
             /* ======================================================
             Todo Widget
             ====================================================== */
+            /* ======================================================
+            Todo Widget
+            ====================================================== */
             #todoWidget {
                 bottom: 0;
+                bottom: 0;
                 left: 10px;
+                padding: 10px;
                 padding: 10px;
                 overflow: auto;
             }
 
             #todoWidget ul {
                 list-style-type: none;
+                padding: 0;
                 padding: 0;
                 margin-top: 10px;
             }
@@ -118,22 +129,29 @@
                 padding: 5px;
                 border-radius: 3px;
                 background-color: rgba(255, 255, 255, 0.1);
+                background-color: rgba(255, 255, 255, 0.1);
             }
 
             /* ======================================================
             Resize Handles
             ====================================================== */
+            /* ======================================================
+            Resize Handles
+            ====================================================== */
             .resize-handle {
+                width: 10px;
                 width: 10px;
                 height: 10px;
                 background-color: rgba(255, 255, 255, 0.5);
                 position: absolute;
+                bottom: 0;
                 bottom: 0;
                 right: 0;
                 cursor: nwse-resize;
             }
 
             #todoWidget .resize-handle {
+                width: 15px;
                 width: 15px;
                 height: 15px;
                 background-color: rgba(255, 255, 255, 0.7);
@@ -143,18 +161,28 @@
             /* ======================================================
             Minimalist Toolbar Popup
             ====================================================== */
+            /* ======================================================
+            Minimalist Toolbar Popup
+            ====================================================== */
             #minimalist-toolbar-popup {
+                top: 50px;
                 top: 50px;
                 left: 10px;
                 width: 250px;
                 background: #f9f9f9;
+                background: #f9f9f9;
                 color: #333;
+                padding: 15px;
                 padding: 15px;
                 border: 1px solid #ddd;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                 display: none;
                 flex-direction: column;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                display: none;
+                flex-direction: column;
                 align-items: center;
+                border-radius: 10px;
                 border-radius: 10px;
                 z-index: 1000;
             }
@@ -162,15 +190,21 @@
             #minimalist-toolbar-popup textarea {
                 width: 100%;
                 background: #fff;
+                width: 100%;
+                background: #fff;
                 color: #333;
                 border: 1px solid #ddd;
+                border: 1px solid #ddd;
                 border-radius: 5px;
+                padding: 10px;
+                outline: none;
                 padding: 10px;
                 outline: none;
                 resize: none;
             }
 
             #minimalist-calculator {
+                height: 50px;
                 height: 50px;
                 margin-bottom: 15px;
             }
@@ -183,6 +217,10 @@
             Toggle Menu Dropdown (from Cog)
             ====================================================== */
             .toggle-widgets {
+            /* ======================================================
+            Toggle Menu Dropdown (from Cog)
+            ====================================================== */
+            .toggle-widgets {
                 z-index: 9999;
                 background-color: #333;
                 color: #fff;
@@ -190,6 +228,7 @@
                 border-radius: 8px;
                 display: flex;
                 flex-direction: column;
+                gap: 8px; 
                 gap: 8px; 
                 min-width: 150px;
                 max-height: 200px;
@@ -202,8 +241,17 @@
                 align-items: center;
                 background-color: transparent;
                 border-radius: 4px;
+                background-color: transparent;
+                border-radius: 4px;
             }
 
+            .widget-container span {
+                flex: 1;            /* occupy remaining horizontal space */
+                white-space: nowrap;/* prevent wrapping onto a second line */
+                font-size: 16px;    /* adjust as desired */
+            }
+
+            /* The Reset button */
             .widget-container span {
                 flex: 1;            /* occupy remaining horizontal space */
                 white-space: nowrap;/* prevent wrapping onto a second line */
@@ -226,15 +274,23 @@
             /* ======================================================
             Dark Mode Toggle
             ====================================================== */
+            /* ======================================================
+            Dark Mode Toggle
+            ====================================================== */
             #dark-reader-toggle {
+                position: fixed;
+                bottom: 10px;
                 position: fixed;
                 bottom: 10px;
                 left: 70px;
                 z-index: 10000;
+                z-index: 10000;
                 padding: 10px;
                 background-color: transparent;
                 color: white;
+                color: white;
                 border-radius: 50%;
+                cursor: pointer;
                 cursor: pointer;
                 font-size: 20px;
                 text-align: center;
@@ -279,7 +335,49 @@
             /* ======================================================
             FadeIn Animation (for Quote)
             ====================================================== */
+            /* ======================================================
+            Toolbar Toggle (if used)
+            ====================================================== */
+            #minimalist-toolbar-toggle {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                width: 50px;
+                height: 50px;
+                background: linear-gradient(135deg, #007BFF, #0056b3);
+                color: #fff;
+                text-align: center;
+                line-height: 50px;
+                border-radius: 50%;
+                font-size: 20px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+                z-index: 1001;
+                cursor: pointer;
+                transition: background 0.3s, transform 0.2s;
+                }
+
+                #minimalist-toolbar-toggle:hover {
+                background: linear-gradient(135deg, #0056b3, #007BFF);
+                transform: scale(1.1);
+            }
+
+            /* ======================================================
+            Container for Widget Toggle Rows (if needed)
+            ====================================================== */
+            #container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 2px;
+            }
+
+            /* ======================================================
+            FadeIn Animation (for Quote)
+            ====================================================== */
             @keyframes fadeIn {
+                to {
+                    opacity: 1;
+                }
                 to {
                     opacity: 1;
                 }
@@ -545,6 +643,97 @@
         }
     }
 
+    /** Functions for Footer ***/
+    function createFooterModeSelector() {
+        // Container
+        const container = document.createElement('div');
+        container.className = 'widget-container';
+    
+        // Label
+        const label = document.createElement('span');
+        label.textContent = 'Footer Mode';
+        label.style.flex = "1"; // let the label fill available space
+        label.style.fontSize = "16px";
+    
+        // Dropdown
+        const select = document.createElement('select');
+        select.style.width = "120px";
+        select.style.padding = "3px";
+        select.style.borderRadius = "3px";
+        select.style.border = "1px solid #ddd";
+        select.style.fontSize = "14px";
+        
+        const modes = [
+            { value: 'none',     label: 'Do Nothing' },
+            { value: 'remove',   label: 'Remove Footer' },
+            { value: 'modified', label: 'Modified Footer' },
+        ];
+    
+        // Load saved mode (default "none")
+        let savedMode = localStorage.getItem('footerMode') || 'none';
+
+        modes.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m.value;
+            option.textContent = m.label;
+            select.appendChild(option);
+        });
+        select.value = savedMode;
+
+        select.addEventListener('change', () => {
+            const newMode = select.value;
+            localStorage.setItem('footerMode', newMode);
+            applyFooterMode(newMode);
+        });
+
+        container.appendChild(label);
+        container.appendChild(select);
+        return container;
+    }       
+
+    function applyFooterMode(mode) {
+        const footerElement = document.getElementById('footer');
+        if (!footerElement) return;
+    
+        switch (mode) {
+            case 'remove':
+                footerElement.style.display = 'none';
+                break;
+    
+            case 'modified':
+                footerElement.style.display = '';
+                adjustFooter();
+                break;
+    
+            default:
+                footerElement.style.display = '';
+                footerElement.style.position = '';
+                footerElement.style.bottom = '';
+                footerElement.style.left = '';
+                footerElement.style.right = '';
+                break;
+        }
+    }    
+
+    function adjustFooter() {
+        const footerElement = document.getElementById('footer');
+        if (!footerElement) return;
+
+        // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
+        if (document.body.scrollHeight <= window.innerHeight) {
+            footerElement.style.position = 'fixed';
+            footerElement.style.bottom = '0';
+            footerElement.style.left = '0';
+            footerElement.style.right = '0';
+        } else {
+            // Otherwise, let the site's own CSS take over.
+            footerElement.style.position = '';
+            footerElement.style.bottom = '';
+            footerElement.style.left = '';
+            footerElement.style.right = '';
+        }
+    }
+
     /*** Widgets Manager ***/
     function createWidgetToggleCog() {
         const cogContainer = document.createElement('div');
@@ -597,7 +786,10 @@
 
         const widgets = [
             { name: 'Clock', id: 'clockWidget', init: addClock },
+            { name: 'Clock', id: 'clockWidget', init: addClock },
             { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
+            { name: 'Todo List', id: 'todoWidget', init: addTodoList },
+            { name: 'Quote', id: 'quoteWidget', init: addInspirationalQuoteWidget }
             { name: 'Todo List', id: 'todoWidget', init: addTodoList },
             { name: 'Quote', id: 'quoteWidget', init: addInspirationalQuoteWidget }
         ];
@@ -606,6 +798,9 @@
             const container = createWidgetContainer(widget);
             toggleMenu.appendChild(container);
         });
+
+        const footerModeSelector = createFooterModeSelector();
+        toggleMenu.appendChild(footerModeSelector);
 
         const footerModeSelector = createFooterModeSelector();
         toggleMenu.appendChild(footerModeSelector);
@@ -742,6 +937,7 @@
     function addClock() {
         clockWidget = document.createElement('div');
         clockWidget.id = 'clockWidget';
+        clockWidget.style.resize = "none";
         clockWidget.style.resize = "none";
 
         function updateClock() {
@@ -1102,6 +1298,12 @@
         }
         if (document.getElementById('quoteWidget')) return;
 
+    async function addInspirationalQuoteWidget() {
+        if (!window.location.pathname.startsWith('/owsoo/login/auth')) {
+            return;
+        }
+        if (document.getElementById('quoteWidget')) return;
+
         const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
         try {
             const response = await fetch(quotesURL, { cache: "no-store" });
@@ -1132,7 +1334,9 @@
         document.head.appendChild(link);
 
         // Create the quote container
+        // Create the quote container
         const quoteContainer = document.createElement('div');
+        quoteContainer.id = 'quoteWidget';
         quoteContainer.id = 'quoteWidget';
         Object.assign(quoteContainer.style, {
             position: 'fixed', top: '50%', right: '200px',
@@ -1143,6 +1347,13 @@
             lineHeight: '1.5', zIndex: '1000', maxWidth: '350px', textAlign: 'center',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', opacity: '0', animation: 'fadeIn 1s forwards'
         });
+
+        // The quote text
+        const quoteText = document.createElement('div');
+        quoteText.textContent = quote;
+
+        quoteContainer.appendChild(quoteText);
+        document.body.appendChild(quoteContainer);
 
         // The quote text
         const quoteText = document.createElement('div');
@@ -1164,6 +1375,7 @@
         injectCSS();
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
             if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
+            if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
             removeLoginError();
         } else {
             modifyPageHead();
@@ -1177,7 +1389,10 @@
             //addContributorTab();
             const savedMode = localStorage.getItem('footerMode') || 'none';
             applyFooterMode(savedMode);
+            const savedMode = localStorage.getItem('footerMode') || 'none';
+            applyFooterMode(savedMode);
 
+            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addClock();
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
             if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
