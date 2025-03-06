@@ -505,7 +505,8 @@
         const widgets = [
             { name: 'Clock', id: 'clockWidget', init: addCustomizableClock },
             { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
-            { name: 'Todo List', id: 'todoWidget', init: addTodoList }
+            { name: 'Todo List', id: 'todoWidget', init: addTodoList },
+            { name: 'Quote', id: 'quoteWidget', init: addInspirationalQuoteWidget }
         ];
 
         widgets.forEach(widget => {
@@ -519,20 +520,15 @@
 
     function createWidgetContainer(widget) {
         let isEnabled = JSON.parse(localStorage.getItem(widget.id) || 'true');
-        // if (isEnabled && !document.getElementById(widget.id)) {
-        //     widget.init();
-        // }
 
         const label = document.createElement('span');
         label.textContent = widget.name;
         label.style.marginBottom = '5px';
         label.style.cursor = 'pointer';
 
-        // When the user clicks the label, toggle enable/disable:
         label.addEventListener('click', () => {
             isEnabled = !isEnabled;
             localStorage.setItem(widget.id, isEnabled);
-
             if (isEnabled) {
                 widget.init();
             } else {
@@ -543,10 +539,8 @@
         const resetButton = createResetButton(widget);
         const container = document.createElement('div');
         container.className = 'widget-container';
-
         container.appendChild(label);
         container.appendChild(resetButton);
-
         return container;
     }
 
@@ -575,6 +569,7 @@
     function addCustomizableClock() {
         clockWidget = document.createElement('div');
         clockWidget.id = 'clockWidget';
+        clockWidget.style.resize = "none";
 
         function updateClock() {
             const now = new Date();
@@ -928,9 +923,10 @@
     }
 
     /*** Inspirational Quote ***/
-    async function loadAndDisplayQuote() {
-        const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
+    async function addInspirationalQuoteWidget() {
+        if (document.getElementById('quoteWidget')) return;
 
+        const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
         try {
             const response = await fetch(quotesURL, { cache: "no-store" });
             if (!response.ok) {
@@ -960,26 +956,46 @@
         document.head.appendChild(link);
 
         const quoteContainer = document.createElement('div');
+        quoteContainer.id = 'quoteWidget';
         Object.assign(quoteContainer.style, {
-            position: 'fixed', top: '50%', right: '200px',
+            position: 'fixed',
+            top: '50%',
+            right: '200px',
             transform: 'translateY(-50%)',
             background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-            color: 'white', padding: '20px', borderRadius: '15px',
-            fontFamily: '"Merriweather", serif', fontSize: '22px',
-            lineHeight: '1.5', zIndex: '1000', maxWidth: '350px', textAlign: 'center',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', opacity: '0', animation: 'fadeIn 1s forwards'
+            color: 'white',
+            padding: '20px',
+            borderRadius: '15px',
+            fontFamily: '"Merriweather", serif',
+            fontSize: '22px',
+            lineHeight: '1.5',
+            zIndex: '1000',
+            maxWidth: '350px',
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
         });
-        quoteContainer.textContent = quote;
 
+        // Container for the quote text
+        const quoteText = document.createElement('div');
+        quoteText.textContent = quote;
+        quoteText.style.marginRight = '30px';
+
+        const closeButton = document.createElement('span');
+        closeButton.textContent = '✖';
+        Object.assign(closeButton.style, {
+            position: 'absolute',
+            top: '5px',
+            right: '10px',
+            cursor: 'pointer',
+            fontSize: '18px'
+        });
+        closeButton.addEventListener('click', () => {
+            quoteContainer.remove();
+        });
+
+        quoteContainer.appendChild(quoteText);
+        quoteContainer.appendChild(closeButton);
         document.body.appendChild(quoteContainer);
-
-        const loginForm = document.querySelector('.login-form');
-        if (loginForm) loginForm.style.display = 'none';
-
-        setTimeout(() => {
-            //quoteContainer.remove();
-            if (loginForm) loginForm.style.display = 'block';
-        }, 2500);
     }
 
     function removeLoginError() {
@@ -1009,6 +1025,7 @@
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addCustomizableClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
             if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
+            if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
         }
     }
 
