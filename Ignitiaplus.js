@@ -537,19 +537,39 @@
         const footerElement = document.getElementById('footer');
         if (!footerElement) return;
 
-        // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
-        if (document.body.scrollHeight <= window.innerHeight) {
-            footerElement.style.position = 'fixed';
-            footerElement.style.bottom = '0';
-            footerElement.style.left = '0';
-            footerElement.style.right = '0';
-        } else {
-            // Otherwise, let the site's own CSS take over.
-            footerElement.style.position = '';
-            footerElement.style.bottom = '';
-            footerElement.style.left = '';
-            footerElement.style.right = '';
+        function updateFooterPosition() {
+            // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
+            if (document.body.scrollHeight <= window.innerHeight) {
+                footerElement.style.position = 'fixed';
+                footerElement.style.bottom = '0';
+                footerElement.style.left = '0';
+                footerElement.style.right = '0';
+            } else {
+                // Otherwise, let the site's own CSS take over.
+                footerElement.style.position = '';
+                footerElement.style.bottom = '';
+                footerElement.style.left = '';
+                footerElement.style.right = '';
+            }
         }
+
+        // Initial check
+        updateFooterPosition();
+
+        // Check on window resize
+        window.addEventListener('resize', updateFooterPosition);
+
+        // Check on DOM changes
+        const observer = new MutationObserver(updateFooterPosition);
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true,
+            attributes: true 
+        });
+
+        // Check on dynamic content load
+        window.addEventListener('load', updateFooterPosition);
+        document.addEventListener('DOMContentLoaded', updateFooterPosition);
     }
 
     /*** Widgets Manager ***/
