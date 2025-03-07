@@ -352,6 +352,13 @@
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
+    function removeLoginError() {
+        const loginError = document.querySelector('.login-error.alert.alert-error');
+        if (loginError) {
+            loginError.remove();
+        }
+    }
+
     function logOut() { /***(Credit:BurdenOwl)***/
         const passwordResetForm = document.getElementById("passwordResetFormWrapper");
         if (!passwordResetForm) return;
@@ -662,85 +669,101 @@
     }
 
     /*** Widgets ***/
-    function testAndQuizStopWatch() { //Credit:BurdenOwl
+    function testAndQuizStopWatch() { /***(Credit:BurdenOwl)***/
+        if (!window.location.href.includes('/owsoo/studentAssignment')) return;
+
         const assignmentTab = document.querySelector('.assignmentTitle.assignment-title-text');
         if (!assignmentTab) return;
 
-        const assignmentText = assignmentTab.querySelector("label");
-        if (!assignmentText) { return };
+        const assignmentLabel = assignmentTab.querySelector("label");
+        if (!assignmentLabel) return;
 
-        if (!window.location.href.includes('/owsoo/studentAssignment')) return;
+        const assignmentType = assignmentLabel.textContent.trim();
+        if (assignmentType === "Quiz" || assignmentType === "Test") {
+            const stopwatchWidget = document.createElement('div');
+            stopwatchWidget.id = 'StopWatchWidget';
+            stopwatchWidget.classList.add('incompleted');
+            stopwatchWidget.style.resize = "none";
+            stopwatchWidget.style.position = 'fixed';
+            stopwatchWidget.style.cursor = 'move';
 
-        if (assignmentText.textContent.trim() === "Quiz" || assignmentText.textContent.trim() === "Test") return;
+            const displaySpan = document.createElement("span");
+            displaySpan.id = "displayOfWatch";
+            displaySpan.textContent = "0.00";
+            stopwatchWidget.appendChild(displaySpan);
 
-        // if (assignmentText.textContent.trim() == "Assignment") {
-        //     console.log("eeeeeeee");
-        // };
+            let timer = null;
+            let elapsedTime = 0;
 
-        let StopWatchWidget = document.createElement('div');
-        StopWatchWidget.id = 'StopWatchWidget';
-        StopWatchWidget.classList.add('incompleted')
-        StopWatchWidget.style.resize = "none";
-
-        let timer, seconds = 0;
-
-        let display = document.createElement("span");
-        display.id = "displayOfWatch";
-        display.textContent = "0.00";
-        StopWatchWidget.appendChild(display);
-
-        function start() {
-            if (!timer) {
+            function startTimer() {
+                if (timer) return;
                 timer = setInterval(() => {
-                    seconds += 0.01;
-                    const hours = Math.floor(seconds / 3600);
-                    const minutes = Math.floor((seconds % 3600) / 60);
-                    const remainingSeconds = (seconds % 60).toFixed(2);
+                    elapsedTime += 0.01;
+
+                    const hours = Math.floor(elapsedTime / 3600);
+                    const minutes = Math.floor((elapsedTime % 3600) / 60);
+                    const seconds = (elapsedTime % 60).toFixed(2);
                     const formattedTime =
                         `${String(hours).padStart(2, '0')}:` +
                         `${String(minutes).padStart(2, '0')}:` +
-                        `${String(remainingSeconds).padStart(5, '0')}`;
+                        `${String(seconds).padStart(5, '0')}`;
 
-                    const questionsNumber = document.querySelector(".totalProblemCount")
+                    const questionsNumberElement = document.querySelector(".totalProblemCount");
+                    if (questionsNumberElement) {
+                        const totalProblems = parseInt(questionsNumberElement.textContent.trim(), 10);
+                        const minutesConverted = minutes + (seconds / 60);
+                        const totalTimeInMinutes = hours * 60 + minutesConverted;
 
-                    if (minutes >= parseInt(questionsNumber.textContent.trim()) * 1.3) {
-                        StopWatchWidget.classList.remove("incompleted");
-                        StopWatchWidget.classList.add("completed");
+                        if (!isNaN(totalProblems)) {
+                            const expectedTime = 1.1 * (totalProblems - 5) + 10;
+                            if (totalTimeInMinutes >= expectedTime) {
+                                stopwatchWidget.classList.remove("incompleted");
+                                stopwatchWidget.classList.add("completed");
+                            }
+                        }
                     }
 
-                    document.getElementById("displayOfWatch").textContent = formattedTime;
+                    displaySpan.textContent = formattedTime;
                 }, 10);
             }
-        }
 
-        let isDragging = false, offsetX, offsetY;
-        StopWatchWidget.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - StopWatchWidget.offsetLeft;
-            offsetY = e.clientY - StopWatchWidget.offsetTop;
-        });
+            // Drag functionality
+            let isDragging = false;
+            let offsetX = 0;
+            let offsetY = 0;
 
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
+            stopwatchWidget.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                offsetX = e.clientX - stopwatchWidget.offsetLeft;
+                offsetY = e.clientY - stopwatchWidget.offsetTop;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
                 let newX = e.clientX - offsetX;
                 let newY = e.clientY - offsetY;
-                newX = Math.max(0, Math.min(newX, window.innerWidth - StopWatchWidget.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - StopWatchWidget.offsetHeight));
-                StopWatchWidget.style.left = `${newX}px`;
-                StopWatchWidget.style.top = `${newY}px`;
-            }
-        });
+                newX = Math.max(0, Math.min(newX, window.innerWidth - stopwatchWidget.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - stopwatchWidget.offsetHeight));
+                stopwatchWidget.style.left = `${newX}px`;
+                stopwatchWidget.style.top = `${newY}px`;
+            });
 
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('StopWatchWidgetPosition', JSON.stringify({ left: StopWatchWidget.style.left, top: StopWatchWidget.style.top }));
-            }
-        });
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    localStorage.setItem('StopWatchWidgetPosition', JSON.stringify({
+                        left: stopwatchWidget.style.left,
+                        top: stopwatchWidget.style.top
+                    }));
+                }
+            });
 
-        document.body.appendChild(StopWatchWidget);
-        start();
-        loadSavedPositionAndSize(StopWatchWidget, 'StopWatchWidgetPosition', null)
+            document.body.appendChild(stopwatchWidget);
+            startTimer();
+            loadSavedPositionAndSize(stopwatchWidget, 'StopWatchWidgetPosition', null);
+        } else {
+            return; // Exit if not a Quiz/Test
+        }
     }
 
     function addClock() {
@@ -1154,13 +1177,6 @@
 
         quoteContainer.appendChild(quoteText);
         document.body.appendChild(quoteContainer);
-    }
-
-    function removeLoginError() {
-        const loginError = document.querySelector('.login-error.alert.alert-error');
-        if (loginError) {
-            loginError.remove();
-        }
     }
 
     /*** Initialization ***/
