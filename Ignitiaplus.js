@@ -553,18 +553,15 @@
             }
         }
 
-        // Initial check
         updateFooterPosition();
 
-        // Check on window resize
         window.addEventListener('resize', updateFooterPosition);
 
-        // Check on DOM changes
         const observer = new MutationObserver(updateFooterPosition);
-        observer.observe(document.body, { 
-            childList: true, 
+        observer.observe(document.body, {
+            childList: true,
             subtree: true,
-            attributes: true 
+            attributes: true
         });
 
         // Check on dynamic content load
