@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         IgnitiaPlus
 // @namespace    http://tampermonkey.net/
-// @version      2.0.0
+// @version      2.0.1
 // @license      Apache-2.0
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
@@ -10,7 +10,7 @@
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
-// @require      https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.min.js
+// @require      https://cdn.jsdelivr.net/npm/mathjs@14/lib/browser/math.min.js
 // @downloadURL  https://update.greasyfork.org/scripts/506350/IgnitiaPlus.user.js
 // @updateURL    https://update.greasyfork.org/scripts/506350/IgnitiaPlus.meta.js
 // ==/UserScript==
