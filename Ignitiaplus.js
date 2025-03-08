@@ -6,7 +6,7 @@
 // @description  Enhance your study experience with IgnitiaPlus
 // @author       Minemetero
 // @match        *://*.ignitiaschools.com/*
-// @icon         https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png
+// @icon         https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/2.png
 // @grant        GM.getValue
 // @grant        GM.setValue
 // @require      https://unpkg.com/darkreader@latest/darkreader.js
@@ -24,6 +24,12 @@
     function injectCSS() {
         const style = document.createElement('style');
         style.textContent = `
+            :root {
+                --primary-color: #007BFF;
+                --primary-color-dark: #0056b3;
+                --text-color: #ffffff;
+            }
+
             /* ======================================================
             General Widget Styles
             ====================================================== */
@@ -205,16 +211,16 @@
             }
 
             .widget-container span {
-                flex: 1;            /* occupy remaining horizontal space */
-                white-space: nowrap;/* prevent wrapping onto a second line */
-                font-size: 16px;    /* adjust as desired */
+                flex: 1;
+                white-space: nowrap;
+                font-size: 16px;
             }
 
             /* The Reset button */
             #resetButton {
                 margin-left: 8px;
-                background-color: #007BFF;
-                color: white;
+                background-color: var(--primary-color);
+                color: var(--text-color);
                 border: none;
                 border-radius: 5px;
                 padding: 4px 8px;
@@ -249,7 +255,7 @@
                 left: 10px;
                 width: 50px;
                 height: 50px;
-                background: linear-gradient(135deg, #007BFF, #0056b3);
+                background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
                 color: #fff;
                 text-align: center;
                 line-height: 50px;
@@ -259,10 +265,10 @@
                 z-index: 1001;
                 cursor: pointer;
                 transition: background 0.3s, transform 0.2s;
-                }
+            }
 
-                #minimalist-toolbar-toggle:hover {
-                background: linear-gradient(135deg, #0056b3, #007BFF);
+            #minimalist-toolbar-toggle:hover {
+                background: linear-gradient(135deg, var(--primary-color-dark), var(--primary-color));
                 transform: scale(1.1);
             }
 
@@ -634,6 +640,9 @@
         const footerModeSelector = createFooterModeSelector();
         toggleMenu.appendChild(footerModeSelector);
 
+        const themeSelector = createThemeSelector();
+        toggleMenu.appendChild(themeSelector);
+
         toggleMenu.style.marginBottom = '2px';
         return toggleMenu;
     }
@@ -676,10 +685,10 @@
         });
 
         resetButton.addEventListener('mouseover', () => {
-            resetButton.style.backgroundColor = '#0056b3';
+            resetButton.style.backgroundColor = 'var(--primary-color-dark)';
         });
         resetButton.addEventListener('mouseout', () => {
-            resetButton.style.backgroundColor = '#007BFF';
+            resetButton.style.backgroundColor = 'var(--primary-color)';
         });
 
         return resetButton;
@@ -1196,6 +1205,65 @@
         document.body.appendChild(quoteContainer);
     }
 
+    /*** Theme Changer ***/
+    function setTheme(primary, primaryDark) {
+        document.documentElement.style.setProperty('--primary-color', primary);
+        document.documentElement.style.setProperty('--primary-color-dark', primaryDark);
+        localStorage.setItem('themePrimary', primary);
+        localStorage.setItem('themePrimaryDark', primaryDark);
+    }
+
+    function createThemeSelector() {
+        const container = document.createElement('div');
+        container.className = 'widget-container';
+
+        const label = document.createElement('span');
+        label.textContent = 'Theme:';
+        label.style.flex = "1";
+        label.style.fontSize = "16px";
+
+        const select = document.createElement('select');
+        select.style.width = "120px";
+        select.style.padding = "3px";
+        select.style.borderRadius = "3px";
+        select.style.border = "1px solid #ddd";
+        select.style.fontSize = "14px";
+
+        // Define your preset themes
+        const themes = [
+            { value: 'blue', label: 'Blue', primary: '#007BFF', primaryDark: '#0056b3' },
+            { value: 'red', label: 'Red', primary: '#FF4136', primaryDark: '#C0392B' },
+            { value: 'green', label: 'Green', primary: '#2ECC40', primaryDark: '#27AE60' },
+            { value: 'purple', label: 'Purple', primary: '#B10DC9', primaryDark: '#8E44AD' }
+        ];
+
+        themes.forEach(theme => {
+            const option = document.createElement('option');
+            option.value = theme.value;
+            option.textContent = theme.label;
+            select.appendChild(option);
+        });
+
+        // Load saved theme (default is blue)
+        const savedTheme = localStorage.getItem('theme') || 'blue';
+        select.value = savedTheme;
+        const savedPrimary = localStorage.getItem('themePrimary') || '#007BFF';
+        const savedPrimaryDark = localStorage.getItem('themePrimaryDark') || '#0056b3';
+        setTheme(savedPrimary, savedPrimaryDark);
+
+        select.addEventListener('change', () => {
+            const selected = themes.find(t => t.value === select.value);
+            if (selected) {
+                setTheme(selected.primary, selected.primaryDark);
+                localStorage.setItem('theme', selected.value);
+            }
+        });
+
+        container.appendChild(label);
+        container.appendChild(select);
+        return container;
+    }
+
     /*** Initialization ***/
     async function init() {
         injectCSS();
@@ -1207,13 +1275,18 @@
             removeUnwantedElements();
             addRefreshWarning();
             await createDarkReaderToggle();
-            createWidgetToggleCog()
+            createWidgetToggleCog();
             addMinibar();
             logOut();
-            testAndQuizStopWatch()
-            //addContributorTab();
+            testAndQuizStopWatch();
+            // addContributorTab();
+
             const savedMode = localStorage.getItem('footerMode') || 'none';
             applyFooterMode(savedMode);
+
+            const savedPrimary = localStorage.getItem('themePrimary') || '#007BFF';
+            const savedPrimaryDark = localStorage.getItem('themePrimaryDark') || '#0056b3';
+            setTheme(savedPrimary, savedPrimaryDark);
 
             if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addClock();
             if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
