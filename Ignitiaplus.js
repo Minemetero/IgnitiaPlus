@@ -715,39 +715,62 @@
             displaySpan.textContent = "0.00";
             stopwatchWidget.appendChild(displaySpan);
 
-            let timer = null;
+            let startTime = Date.now();
             let elapsedTime = 0;
+            let timer = null;
+            let running = false;
 
-            function startTimer() {
-                if (timer) return;
-                timer = setInterval(() => {
-                    elapsedTime += 0.01;
+            function updateTimer() {
+                if (!running) return;
+                
+                const currentTime = Date.now();
+                elapsedTime = (currentTime - startTime) / 1000; // in seconds
+                
+                const hours = Math.floor(elapsedTime / 3600);
+                const minutes = Math.floor((elapsedTime % 3600) / 60);
+                const seconds = (elapsedTime % 60).toFixed(2);
+                const formattedTime =
+                    `${String(hours).padStart(2, '0')}:` +
+                    `${String(minutes).padStart(2, '0')}:` +
+                    `${String(seconds).padStart(5, '0')}`;
 
-                    const hours = Math.floor(elapsedTime / 3600);
-                    const minutes = Math.floor((elapsedTime % 3600) / 60);
-                    const seconds = (elapsedTime % 60).toFixed(2);
-                    const formattedTime =
-                        `${String(hours).padStart(2, '0')}:` +
-                        `${String(minutes).padStart(2, '0')}:` +
-                        `${String(seconds).padStart(5, '0')}`;
+                const questionsNumberElement = document.querySelector(".totalProblemCount");
+                if (questionsNumberElement) {
+                    const totalProblems = parseInt(questionsNumberElement.textContent.trim(), 10);
+                    const minutesConverted = minutes + (parseFloat(seconds) / 60);
+                    const totalTimeInMinutes = hours * 60 + minutesConverted;
 
-                    const questionsNumberElement = document.querySelector(".totalProblemCount");
-                    if (questionsNumberElement) {
-                        const totalProblems = parseInt(questionsNumberElement.textContent.trim(), 10);
-                        const minutesConverted = minutes + (seconds / 60);
-                        const totalTimeInMinutes = hours * 60 + minutesConverted;
-
-                        if (!isNaN(totalProblems)) {
-                            const expectedTime = 1.1 * (totalProblems - 5) + 10;
-                            if (totalTimeInMinutes >= expectedTime) {
-                                stopwatchWidget.classList.remove("incompleted");
-                                stopwatchWidget.classList.add("completed");
-                            }
+                    if (!isNaN(totalProblems)) {
+                        const expectedTime = 1.1 * (totalProblems - 5) + 10;
+                        if (totalTimeInMinutes >= expectedTime) {
+                            stopwatchWidget.classList.remove("incompleted");
+                            stopwatchWidget.classList.add("completed");
                         }
                     }
+                }
 
-                    displaySpan.textContent = formattedTime;
-                }, 10);
+                displaySpan.textContent = formattedTime;
+                requestAnimationFrame(updateTimer);
+            }
+
+            function startTimer() {
+                if (running) return;
+                startTime = Date.now();
+                running = true;
+                requestAnimationFrame(updateTimer);
+
+                localStorage.setItem('stopwatchStartTime', startTime.toString());
+                document.addEventListener('visibilitychange', handleVisibilityChange);
+            }
+            
+            function handleVisibilityChange() {
+                if (document.visibilityState === 'visible') {
+                    const storedStartTime = parseInt(localStorage.getItem('stopwatchStartTime') || '0', 10);
+                    if (storedStartTime > 0) {
+                        startTime = storedStartTime;
+                        running = true;
+                    }
+                }
             }
 
             // Drag functionality
@@ -1082,7 +1105,7 @@
         toggleButton.style.alignItems = "center";
         toggleButton.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" width="24" height="24" style="display: block; margin: auto;">
-              <path fill="white" d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"></path>
+                <path fill="white" d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"></path>
             </svg>`;
 
         toggleButton.addEventListener('click', () => {
