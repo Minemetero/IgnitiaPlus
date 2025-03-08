@@ -701,11 +701,8 @@
         const assignmentTab = document.querySelector('.assignmentTitle.assignment-title-text');
         if (!assignmentTab) return;
 
-        const assignmentLabel = assignmentTab.querySelector("label");
-        if (!assignmentLabel) return;
-
-        const assignmentType = assignmentLabel.textContent.trim();
-        if (assignmentType === "Quiz" || assignmentType === "Test") {
+        const assignmentType = assignmentLabel.textContent;
+        if (assignmentType.includes("Quiz") || assignmentType.includes("Test")) {
             const stopwatchWidget = document.createElement('div');
             stopwatchWidget.id = 'StopWatchWidget';
             stopwatchWidget.classList.add('incompleted');
