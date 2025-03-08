@@ -701,7 +701,7 @@
         const assignmentTab = document.querySelector('.assignmentTitle.assignment-title-text');
         if (!assignmentTab) return;
 
-        const assignmentType = assignmentLabel.textContent;
+        const assignmentType = assignmentTab.textContent;
         if (assignmentType.includes("Quiz") || assignmentType.includes("Test")) {
             const stopwatchWidget = document.createElement('div');
             stopwatchWidget.id = 'StopWatchWidget';
