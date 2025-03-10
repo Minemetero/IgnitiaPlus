@@ -402,6 +402,25 @@
         });
     }
 
+    function assignmentLabel () {
+
+        if (!window.location.href.includes('/owsoo/studentAssignment')) {
+            return;
+        };
+
+        const tag = document.querySelector(".assignmentTitle");
+        const innerTag = tag.children[0]; 
+        if (tag.textContent.includes("Quiz") == true) { 
+            innerTag.textContent = "Quiz";
+        } else if (tag.textContent.includes("Test") == true) {
+            innerTag.textContent = "Test";
+        } else if (tag.textContent.includes("Project") == true) {
+            innerTag.textContent = "Project";
+        } else if (tag.textContent.includes("Review") == true) {
+            innerTag.textContent = "Review";
+        };
+    };
+
     function addRefreshWarning() {
         if (window.location.href.includes('/owsoo/home')) return;
         let warningActive = false;
@@ -1318,6 +1337,7 @@
             addMinibar();
             logOut();
             testAndQuizStopWatch();
+            assignmentLabel();
             // addContributorTab();
 
             const savedMode = localStorage.getItem('footerMode') || 'none';
