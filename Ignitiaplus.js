@@ -418,6 +418,8 @@
             innerTag.textContent = "Project";
         } else if (tag.textContent.includes("Review") == true) {
             innerTag.textContent = "Review";
+        } else if (tag.textContent.includes("Exam") == true) {
+            innerTag.textContent = "Exam";
         };
     };
 
