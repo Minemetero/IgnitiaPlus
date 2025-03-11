@@ -410,7 +410,10 @@
         } else if (tag.textContent.includes("Project") == true) {
             innerTag.textContent = "Project";
         } else if (tag.textContent.includes("Review") == true) {
+            if (tag.textContent.includes("Test") == true || tag.textContent.includes("Quiz") == true) return;
             innerTag.textContent = "Review";
+        } else if (tag.textContent.includes("Exam") == true) {
+            innerTag.textContent = "Exam";
         };
     };
 
