@@ -337,24 +337,18 @@
         }
     }
 
-    function keepWebsiteAlive() {
-        const workerCode = `
-        self.onmessage = function(e) {
-            if (e.data === 'start') {
-                setInterval(() => {
-                self.postMessage('tick');
-                }, 1200000);
-            }
-        };
-        `;
-        const blob = new Blob([workerCode], { type: 'application/javascript' });
-        const worker = new Worker(URL.createObjectURL(blob));
-
-        worker.onmessage = function (e) {
-            console.log('Worker says:', e.data);
-        };
-
-        worker.postMessage('start');
+    function simulateUserInteraction() {
+        setInterval(() => {
+            const simulatedEvent = new MouseEvent('mousemove', {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                clientX: Math.random() * window.innerWidth,
+                clientY: Math.random() * window.innerHeight
+            });
+            document.dispatchEvent(simulatedEvent);
+            console.log("Simulated mousemove event to keep the page active.");
+        }, 60000);
     }
 
     /*** Page Modifiers ***/
@@ -402,15 +396,14 @@
         });
     }
 
-    function assignmentLabel () {
-
+    function assignmentLabel() {/***(Credit:BurdenOwl)***/
         if (!window.location.href.includes('/owsoo/studentAssignment')) {
             return;
         };
 
         const tag = document.querySelector(".assignmentTitle");
-        const innerTag = tag.children[0]; 
-        if (tag.textContent.includes("Quiz") == true) { 
+        const innerTag = tag.children[0];
+        if (tag.textContent.includes("Quiz") == true) {
             innerTag.textContent = "Quiz";
         } else if (tag.textContent.includes("Test") == true) {
             innerTag.textContent = "Test";
@@ -1324,7 +1317,7 @@
     /*** Initialization ***/
     async function init() {
         injectCSS();
-        //keepWebsiteAlive();
+        simulateUserInteraction();
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
             if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
             removeLoginError();
