@@ -358,10 +358,10 @@
         const titleText = titleElement.textContent.trim();
         if (titleText === 'Ignitia') {
             titleElement.textContent = 'IgnitiaPlus';
-            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/favicon.png');
+            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/assets/favicon.png');
         } else if (titleText === 'switchedonuk') {
             titleElement.textContent = 'SwitchedOnPlus';
-            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/SwitchedOn.png');
+            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/assets/SwitchedOn.png');
         }
     }
 
