@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "IgnitiaPlus",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "Enhance your study experience with IgnitiaPlus",
     "icons": {
         "48": "icon.png",
