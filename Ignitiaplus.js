@@ -337,20 +337,6 @@
         }
     }
 
-    function simulateUserInteraction() {
-        setInterval(() => {
-            const simulatedEvent = new MouseEvent('mousemove', {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                clientX: Math.random() * window.innerWidth,
-                clientY: Math.random() * window.innerHeight
-            });
-            document.dispatchEvent(simulatedEvent);
-            console.log("Simulated mousemove event to keep the page active.");
-        }, 60000);
-    }
-
     /*** Page Modifiers ***/
     function modifyPageHead() {
         const titleElement = document.querySelector('title');
@@ -1350,7 +1336,6 @@
     /*** Initialization ***/
     async function init() {
         injectCSS();
-        simulateUserInteraction();
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
             if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
             removeLoginError();
