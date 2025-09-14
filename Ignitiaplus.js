@@ -1137,8 +1137,6 @@
         document.body.appendChild(toolbar);
     }
 
-
-
     function createToolbar() {
         const toolbar = document.createElement('div');
         toolbar.id = 'minimalist-toolbar-popup';
