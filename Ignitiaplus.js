@@ -414,7 +414,9 @@
             innerTag.textContent = "Review";
         } else if (tag.textContent.includes("Exam") == true) {
             innerTag.textContent = "Exam";
-        };
+        } else if (tag.textContent.includes("Course Overview") == true) {
+            innerTag.textContent = "Overview";
+        }
     };
 
     function addRefreshWarning() {
