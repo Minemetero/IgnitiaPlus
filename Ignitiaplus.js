@@ -196,7 +196,7 @@
                 border-radius: 8px;
                 display: flex;
                 flex-direction: column;
-                gap: 8px; 
+                gap: 8px;
                 min-width: 150px;
                 max-height: 200px;
                 overflow-y: auto;
@@ -416,6 +416,10 @@
             innerTag.textContent = "Exam";
         } else if (tag.textContent.includes("Course Overview") == true) {
             innerTag.textContent = "Overview";
+        } else if (tag.textContent.includes("Essay") == true) {
+            innerTag.textContent = "Essay";
+        } else if (tag.textContent.includes("Performance Task") == true) {
+            innerTag.textContent = "PT";
         }
     };
 
@@ -1090,6 +1094,15 @@
 
         if (await GM.getValue('darkMode', false)) enableDarkMode();
         else disableDarkMode();
+
+        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
+        if (await GM.getValue('darkMode', false)) {
+            if (divWithName.textContent.includes("SwitchedOn") == true) {
+                const logoElement = document.querySelector('#gl_logo img');
+                if (logoElement) logoElement.src = "https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/logo(7).png";
+            };
+        }
+
     }
 
     function enableDarkMode() {
@@ -1097,16 +1110,29 @@
         DarkReader.enable({ brightness: 105, contrast: 105, sepia: 0 });
         const btn = document.getElementById('dark-reader-toggle');
         if (btn) btn.textContent = '🔅';
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
+        if (divWithName.textContent.includes("SwitchedOn") == true) {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = "https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/logo(7).png";
+        } else {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+        }
     }
 
     function disableDarkMode() {
         DarkReader.disable();
         const btn = document.getElementById('dark-reader-toggle');
         if (btn) btn.textContent = '🔆';
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+
+        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
+        if (divWithName.textContent.includes("SwitchedOn") == true) {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = "https://media-release.glynlyon.com/branding/images/bournemouthchristianschool/logo.png";
+        } else {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+        }
     }
 
     /*** Minimalist Toolbar ***/
@@ -1124,6 +1150,8 @@
         document.body.appendChild(toggleButton);
         document.body.appendChild(toolbar);
     }
+
+
 
     function createToolbar() {
         const toolbar = document.createElement('div');
