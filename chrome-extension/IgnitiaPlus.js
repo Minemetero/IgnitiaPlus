@@ -194,7 +194,7 @@ function GM_setValue(key, value) {
                 border-radius: 8px;
                 display: flex;
                 flex-direction: column;
-                gap: 8px; 
+                gap: 8px;
                 min-width: 150px;
                 max-height: 200px;
                 overflow-y: auto;
@@ -335,20 +335,6 @@ function GM_setValue(key, value) {
         }
     }
 
-    function simulateUserInteraction() {
-        setInterval(() => {
-            const simulatedEvent = new MouseEvent('mousemove', {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                clientX: Math.random() * window.innerWidth,
-                clientY: Math.random() * window.innerHeight
-            });
-            document.dispatchEvent(simulatedEvent);
-            console.log("Simulated mousemove event to keep the page active.");
-        }, 60000);
-    }
-
     /*** Page Modifiers ***/
     function modifyPageHead() {
         const titleElement = document.querySelector('title');
@@ -357,9 +343,9 @@ function GM_setValue(key, value) {
         if (titleText === 'Ignitia') {
             titleElement.textContent = 'IgnitiaPlus';
             injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/assets/favicon.png');
-        } else if (titleText === 'switchedonuk') {
+        } else if (titleText === 'Bournemouth Christian School') {
             titleElement.textContent = 'SwitchedOnPlus';
-            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/assets/SwitchedOn.png');
+            injectFavicon('https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/switchedonplus.png');
         }
     }
 
@@ -412,7 +398,13 @@ function GM_setValue(key, value) {
             innerTag.textContent = "Review";
         } else if (tag.textContent.includes("Exam") == true) {
             innerTag.textContent = "Exam";
-        };
+        } else if (tag.textContent.includes("Course Overview") == true) {
+            innerTag.textContent = "Overview";
+        } else if (tag.textContent.includes("Essay") == true) {
+            innerTag.textContent = "Essay";
+        } else if (tag.textContent.includes("Performance Task") == true) {
+            innerTag.textContent = "PT";
+        }
     };
 
     function addRefreshWarning() {
@@ -448,16 +440,17 @@ function GM_setValue(key, value) {
             z-index: 1000;
             white-space: nowrap;
             pointer-events: none;
-            transform: translateX(-100%) translateY(-50%);
-            margin-right: 10px;
+            transform: translateX(-100%) translateY(-50%);  /* Changed to move left and center vertically */
+            margin-right: 10px;  /* Added margin to separate from the tab */
         `;
         tooltip.textContent = 'IgnitiaPlus contributors: Minemetero, BurdenOwl';
 
+        // Updated tooltip positioning on hover
         contributorTab.addEventListener('mouseenter', () => {
             tooltip.style.display = 'block';
             const rect = contributorTab.getBoundingClientRect();
-            tooltip.style.left = `${rect.left}px`;
-            tooltip.style.top = `${rect.top + (rect.height / 2)}px`;
+            tooltip.style.left = `${rect.left}px`;  // Position at left edge of tab
+            tooltip.style.top = `${rect.top + (rect.height / 2)}px`;  // Center vertically
         });
 
         contributorTab.addEventListener('mouseleave', () => {
@@ -484,6 +477,7 @@ function GM_setValue(key, value) {
         contributorLink.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+
         });
 
         contributorLink.innerHTML = `
@@ -498,14 +492,17 @@ function GM_setValue(key, value) {
 
     /** Functions for Footer ***/
     function createFooterModeSelector() {
+        // Container
         const container = document.createElement('div');
         container.className = 'widget-container';
 
+        // Label
         const label = document.createElement('span');
         label.textContent = 'Footer Mode';
         label.style.flex = "1";
         label.style.fontSize = "16px";
 
+        // Dropdown
         const select = document.createElement('select');
         select.style.width = "120px";
         select.style.padding = "3px";
@@ -519,6 +516,7 @@ function GM_setValue(key, value) {
             { value: 'modified', label: 'Modified Footer' },
         ];
 
+        // Load saved mode (default "none")
         let savedMode = localStorage.getItem('footerMode') || 'none';
 
         modes.forEach(m => {
@@ -569,12 +567,14 @@ function GM_setValue(key, value) {
         if (!footerElement) return;
 
         function updateFooterPosition() {
+            // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
             if (document.body.scrollHeight <= window.innerHeight) {
                 footerElement.style.position = 'fixed';
                 footerElement.style.bottom = '0';
                 footerElement.style.left = '0';
                 footerElement.style.right = '0';
             } else {
+                // Otherwise, let the site's own CSS take over.
                 footerElement.style.position = '';
                 footerElement.style.bottom = '';
                 footerElement.style.left = '';
@@ -593,6 +593,7 @@ function GM_setValue(key, value) {
             attributes: true
         });
 
+        // Check on dynamic content load
         window.addEventListener('load', updateFooterPosition);
         document.addEventListener('DOMContentLoaded', updateFooterPosition);
     }
@@ -608,6 +609,7 @@ function GM_setValue(key, value) {
             zIndex: '10000'
         });
 
+        // Create the cog icon
         const cogIcon = document.createElement('div');
         cogIcon.id = 'widget-toggle-cog';
         Object.assign(cogIcon.style, {
@@ -621,6 +623,7 @@ function GM_setValue(key, value) {
         });
         cogIcon.textContent = '⚙️';
 
+        // Build the dropdown container with checkboxes
         const toggleMenu = createToggleMenu();
         Object.assign(toggleMenu.style, {
             position: 'absolute',
@@ -744,7 +747,7 @@ function GM_setValue(key, value) {
                 if (!running) return;
 
                 const currentTime = Date.now();
-                elapsedTime = (currentTime - startTime) / 1000;
+                elapsedTime = (currentTime - startTime) / 1000; // in seconds
 
                 const hours = Math.floor(elapsedTime / 3600);
                 const minutes = Math.floor((elapsedTime % 3600) / 60);
@@ -793,6 +796,7 @@ function GM_setValue(key, value) {
                 }
             }
 
+            // Drag functionality
             let isDragging = false;
             let offsetX = 0;
             let offsetY = 0;
@@ -827,7 +831,7 @@ function GM_setValue(key, value) {
             startTimer();
             loadSavedPositionAndSize(stopwatchWidget, 'StopWatchWidgetPosition', null);
         } else {
-            return;
+            return; // Exit if not a Quiz/Test
         }
     }
 
@@ -1062,18 +1066,27 @@ function GM_setValue(key, value) {
         btn.id = 'dark-reader-toggle';
         btn.textContent = '🔆';
         btn.addEventListener('click', async () => {
-            if (await GM_getValue('darkMode', false)) {
-                await GM_setValue('darkMode', false);
+            if (await GM.getValue('darkMode', false)) {
+                await GM.setValue('darkMode', false);
                 disableDarkMode();
             } else {
-                await GM_setValue('darkMode', true);
+                await GM.setValue('darkMode', true);
                 enableDarkMode();
             }
         });
         document.body.appendChild(btn);
 
-        if (await GM_getValue('darkMode', false)) enableDarkMode();
+        if (await GM.getValue('darkMode', false)) enableDarkMode();
         else disableDarkMode();
+
+        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
+        if (await GM.getValue('darkMode', false)) {
+            if (divWithName.textContent.includes("SwitchedOn") == true) {
+                const logoElement = document.querySelector('#gl_logo img');
+                if (logoElement) logoElement.src = "https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/logo(7).png";
+            };
+        }
+
     }
 
     function enableDarkMode() {
@@ -1081,16 +1094,29 @@ function GM_setValue(key, value) {
         DarkReader.enable({ brightness: 105, contrast: 105, sepia: 0 });
         const btn = document.getElementById('dark-reader-toggle');
         if (btn) btn.textContent = '🔅';
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
+        if (divWithName.textContent.includes("SwitchedOn") == true) {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = "https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/logo(7).png";
+        } else {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = 'https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/failureswebsite.png';
+        }
     }
 
     function disableDarkMode() {
         DarkReader.disable();
         const btn = document.getElementById('dark-reader-toggle');
         if (btn) btn.textContent = '🔆';
-        const logoElement = document.querySelector('#gl_logo img');
-        if (logoElement) logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+
+        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
+        if (divWithName.textContent.includes("SwitchedOn") == true) {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = "https://media-release.glynlyon.com/branding/images/bournemouthchristianschool/logo.png";
+        } else {
+            const logoElement = document.querySelector('#gl_logo img');
+            if (logoElement) logoElement.src = 'https://media-release.glynlyon.com/branding/images/ignitia/logo.png';
+        }
     }
 
     /*** Minimalist Toolbar ***/
@@ -1223,6 +1249,7 @@ function GM_setValue(key, value) {
         link.rel = 'stylesheet';
         document.head.appendChild(link);
 
+        // Create the quote container
         const quoteContainer = document.createElement('div');
         quoteContainer.id = 'quoteWidget';
         Object.assign(quoteContainer.style, {
@@ -1235,6 +1262,7 @@ function GM_setValue(key, value) {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)', opacity: '0', animation: 'fadeIn 1s forwards'
         });
 
+        // The quote text
         const quoteText = document.createElement('div');
         quoteText.textContent = quote;
 
@@ -1266,6 +1294,7 @@ function GM_setValue(key, value) {
         select.style.border = "1px solid #ddd";
         select.style.fontSize = "14px";
 
+        // Define your preset themes
         const themes = [
             { value: 'blue', label: 'Blue', primary: '#007BFF', primaryDark: '#0056b3' },
             { value: 'red', label: 'Red', primary: '#FF4136', primaryDark: '#C0392B' },
@@ -1280,6 +1309,7 @@ function GM_setValue(key, value) {
             select.appendChild(option);
         });
 
+        // Load saved theme (default is blue)
         const savedTheme = localStorage.getItem('theme') || 'blue';
         select.value = savedTheme;
         const savedPrimary = localStorage.getItem('themePrimary') || '#007BFF';
@@ -1302,7 +1332,6 @@ function GM_setValue(key, value) {
     /*** Initialization ***/
     async function init() {
         injectCSS();
-        simulateUserInteraction();
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
             if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
             removeLoginError();
