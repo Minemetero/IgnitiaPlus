@@ -359,9 +359,9 @@
         if (titleText === 'Ignitia') {
             titleElement.textContent = 'IgnitiaPlus';
             injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/assets/favicon.png');
-        } else if (titleText === 'switchedonuk') {
+        } else if (titleText === 'Bournemouth Christian School') {
             titleElement.textContent = 'SwitchedOnPlus';
-            injectFavicon('https://raw.githubusercontent.com/Minemetero/Minemetero/refs/heads/master/assets/SwitchedOn.png');
+            injectFavicon('https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/switchedonplus.png');
         }
     }
 
