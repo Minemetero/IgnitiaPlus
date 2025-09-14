@@ -416,6 +416,10 @@
             innerTag.textContent = "Exam";
         } else if (tag.textContent.includes("Course Overview") == true) {
             innerTag.textContent = "Overview";
+        } else if (tag.textContent.includes("Essay") == true) {
+            innerTag.textContent = "Essay";
+        } else if (tag.textContent.includes("Performance Task") == true) {
+            innerTag.textContent = "PT";
         }
     };
 
