@@ -727,7 +727,7 @@
         if (!assignmentTab) return;
 
         const assignmentType = assignmentTab.textContent;
-        if (assignmentType.includes("Quiz") || assignmentType.includes("Test")) {
+        if (assignmentType.includes("Quiz") || assignmentType.includes("Test") || assignmentType.includes("Exam")) {
             const stopwatchWidget = document.createElement('div');
             stopwatchWidget.id = 'StopWatchWidget';
             stopwatchWidget.classList.add('incompleted');
