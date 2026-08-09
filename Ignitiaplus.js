@@ -19,6 +19,7 @@
     'use strict';
 
     let clockWidget, timetableWidget, todoWidget;
+    let footerController;
     const widgetManager = createWidgetManager();
 
     /*** CSS Injection ***/
@@ -595,62 +596,61 @@
 
     function applyFooterMode(mode) {
         const footerElement = document.getElementById('footer');
+        disableModifiedFooter();
         if (!footerElement) return;
 
         switch (mode) {
             case 'remove':
                 footerElement.style.display = 'none';
                 break;
-
             case 'modified':
                 footerElement.style.display = '';
-                adjustFooter();
+                enableModifiedFooter();
                 break;
-
             default:
                 footerElement.style.display = '';
-                footerElement.style.position = '';
-                footerElement.style.bottom = '';
-                footerElement.style.left = '';
-                footerElement.style.right = '';
-                break;
         }
     }
 
-    function adjustFooter() {
+    function disableModifiedFooter() {
+        footerController?.abort();
+        footerController = undefined;
+        const footerElement = document.getElementById('footer');
+        if (!footerElement) return;
+        footerElement.style.position = '';
+        footerElement.style.bottom = '';
+        footerElement.style.left = '';
+        footerElement.style.right = '';
+    }
+
+    function enableModifiedFooter() {
+        disableModifiedFooter();
         const footerElement = document.getElementById('footer');
         if (!footerElement) return;
 
-        function updateFooterPosition() {
-            // If the content's height is less than or equal to the viewport height, fix the footer at the bottom.
+        footerController = new AbortController();
+        const { signal } = footerController;
+        const updateFooterPosition = () => {
             if (document.body.scrollHeight <= window.innerHeight) {
                 footerElement.style.position = 'fixed';
                 footerElement.style.bottom = '0';
                 footerElement.style.left = '0';
                 footerElement.style.right = '0';
             } else {
-                // Otherwise, let the site's own CSS take over.
                 footerElement.style.position = '';
                 footerElement.style.bottom = '';
                 footerElement.style.left = '';
                 footerElement.style.right = '';
             }
-        }
-
-        updateFooterPosition();
-
-        window.addEventListener('resize', updateFooterPosition);
+        };
 
         const observer = new MutationObserver(updateFooterPosition);
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true
-        });
-
-        // Check on dynamic content load
-        window.addEventListener('load', updateFooterPosition);
-        document.addEventListener('DOMContentLoaded', updateFooterPosition);
+        observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+        signal.addEventListener('abort', () => observer.disconnect(), { once: true });
+        window.addEventListener('resize', updateFooterPosition, { signal });
+        window.addEventListener('load', updateFooterPosition, { signal });
+        document.addEventListener('DOMContentLoaded', updateFooterPosition, { signal });
+        updateFooterPosition();
     }
 
     /*** Widgets Manager ***/
