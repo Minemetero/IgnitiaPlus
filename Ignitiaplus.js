@@ -219,7 +219,7 @@
             }
 
             /* The Reset button */
-            #resetButton {
+            .reset-button {
                 margin-left: 8px;
                 background-color: var(--primary-color);
                 color: var(--text-color);
@@ -391,6 +391,10 @@
         }, { signal });
     }
 
+    function getBrandText() {
+        return document.querySelector('#nonEulaHeaderContent, .brand')?.textContent ?? '';
+    }
+
     /*** Page Modifiers ***/
     function modifyPageHead() {
         const titleElement = document.querySelector('title');
@@ -442,7 +446,8 @@
         };
 
         const tag = document.querySelector(".assignmentTitle");
-        const innerTag = tag.children[0];
+        const innerTag = tag?.children[0];
+        if (!innerTag) return;
         if (tag.textContent.includes("Quiz") == true) {
             innerTag.textContent = "Quiz";
         } else if (tag.textContent.includes("Test") == true) {
@@ -754,7 +759,7 @@
     function createResetButton(widget) {
         const resetButton = document.createElement('button');
         resetButton.textContent = 'Reset';
-        resetButton.id = 'resetButton';
+        resetButton.className = 'reset-button';
 
         resetButton.addEventListener('click', () => {
             localStorage.removeItem(`${widget.id}Position`);
@@ -1068,9 +1073,8 @@
         if (await GM.getValue('darkMode', false)) enableDarkMode();
         else disableDarkMode();
 
-        const divWithName = document.querySelector('#nonEulaHeaderContent, .brand');
         if (await GM.getValue('darkMode', false)) {
-            if (divWithName.textContent.includes("SwitchedOn") == true) {
+            if (getBrandText().includes("SwitchedOn")) {
                 const logoElement = document.querySelector('#gl_logo img');
                 if (logoElement) logoElement.src = "https://raw.githubusercontent.com/BurdenOwl/burdenowl/refs/heads/main/logo(7).png";
             };
