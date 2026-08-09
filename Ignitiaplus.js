@@ -19,6 +19,7 @@
     'use strict';
 
     let clockWidget, timetableWidget, todoWidget;
+    const widgetManager = createWidgetManager();
 
     /*** CSS Injection ***/
     function injectCSS() {
@@ -330,11 +331,63 @@
             element.style.top = `${top}px`;
             element.style.bottom = 'auto'; element.style.right = 'auto';
         }
-        const savedSize = JSON.parse(localStorage.getItem(sizeKey));
+        const savedSize = sizeKey && JSON.parse(localStorage.getItem(sizeKey));
         if (savedSize) {
             element.style.width = savedSize.width;
             element.style.height = savedSize.height;
         }
+    }
+
+    function createWidgetManager() {
+        const cleanups = new Map();
+
+        function unmount(id) {
+            cleanups.get(id)?.();
+            cleanups.delete(id);
+            document.getElementById(id)?.remove();
+        }
+
+        return {
+            mount(id, mountWidget) {
+                unmount(id);
+                const cleanup = mountWidget();
+                if (typeof cleanup === 'function') cleanups.set(id, cleanup);
+            },
+            unmount,
+            reset(id) {
+                unmount(id);
+                localStorage.removeItem(`${id}Position`);
+                localStorage.removeItem(`${id}Size`);
+            }
+        };
+    }
+
+    function makeDraggable(element, handle, storageKey, signal) {
+        let isDragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        handle.addEventListener('pointerdown', (event) => {
+            isDragging = true;
+            offsetX = event.clientX - element.offsetLeft;
+            offsetY = event.clientY - element.offsetTop;
+            handle.setPointerCapture?.(event.pointerId);
+            event.preventDefault();
+        }, { signal });
+
+        document.addEventListener('pointermove', (event) => {
+            if (!isDragging) return;
+            const left = Math.max(0, Math.min(event.clientX - offsetX, window.innerWidth - element.offsetWidth));
+            const top = Math.max(0, Math.min(event.clientY - offsetY, window.innerHeight - element.offsetHeight));
+            element.style.left = `${left}px`;
+            element.style.top = `${top}px`;
+        }, { signal });
+
+        document.addEventListener('pointerup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            localStorage.setItem(storageKey, JSON.stringify({ left: element.style.left, top: element.style.top }));
+        }, { signal });
     }
 
     /*** Page Modifiers ***/
@@ -684,9 +737,9 @@
             isEnabled = !isEnabled;
             localStorage.setItem(widget.id, isEnabled);
             if (isEnabled) {
-                widget.init();
+                widgetManager.mount(widget.id, widget.init);
             } else {
-                document.getElementById(widget.id)?.remove();
+                widgetManager.unmount(widget.id);
             }
         });
 
@@ -840,7 +893,8 @@
     function addClock() {
         clockWidget = document.createElement('div');
         clockWidget.id = 'clockWidget';
-        clockWidget.style.resize = "none";
+        clockWidget.style.resize = 'none';
+        const controller = new AbortController();
 
         function updateClock() {
             const now = new Date();
@@ -850,40 +904,24 @@
             clockWidget.textContent = `${h}:${m}:${s}`;
         }
 
-        let isDragging = false, offsetX, offsetY;
-        clockWidget.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            offsetX = e.clientX - clockWidget.offsetLeft;
-            offsetY = e.clientY - clockWidget.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-                newX = Math.max(0, Math.min(newX, window.innerWidth - clockWidget.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - clockWidget.offsetHeight));
-                clockWidget.style.left = `${newX}px`;
-                clockWidget.style.top = `${newY}px`;
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('clockWidgetPosition', JSON.stringify({ left: clockWidget.style.left, top: clockWidget.style.top }));
-            }
-        });
-
+        makeDraggable(clockWidget, clockWidget, 'clockWidgetPosition', controller.signal);
         updateClock();
-        setInterval(updateClock, 1000);
+        const interval = setInterval(updateClock, 1000);
         document.body.appendChild(clockWidget);
         loadSavedPositionAndSize(clockWidget, 'clockWidgetPosition', null);
+
+        return () => {
+            clearInterval(interval);
+            controller.abort();
+            if (clockWidget === document.getElementById('clockWidget')) clockWidget = undefined;
+        };
     }
 
     function addClassTimetable() {
         timetableWidget = document.createElement('div');
         timetableWidget.id = 'timetableWidget';
+        const controller = new AbortController();
+        const { signal } = controller;
 
         const timetableHeader = document.createElement('div');
         timetableHeader.textContent = '📅 Class Timetable';
@@ -893,173 +931,122 @@
         const timetableBody = document.createElement('textarea');
         timetableBody.placeholder = 'Enter your class schedule here...';
         timetableBody.value = localStorage.getItem('timetable') || '';
-        timetableBody.addEventListener('input', () => localStorage.setItem('timetable', timetableBody.value));
+        timetableBody.addEventListener('input', () => localStorage.setItem('timetable', timetableBody.value), { signal });
 
         const resizeHandle = document.createElement('div');
         resizeHandle.className = 'resize-handle';
-
-        timetableWidget.appendChild(timetableHeader);
-        timetableWidget.appendChild(timetableBody);
-        timetableWidget.appendChild(resizeHandle);
+        timetableWidget.append(timetableHeader, timetableBody, resizeHandle);
         document.body.appendChild(timetableWidget);
 
-        let isDragging = false, isResizing = false, offsetX, offsetY;
-        timetableHeader.addEventListener('mousedown', (e) => {
-            if (e.target === resizeHandle) return;
-            isDragging = true;
-            offsetX = e.clientX - timetableWidget.offsetLeft;
-            offsetY = e.clientY - timetableWidget.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-                newX = Math.max(0, Math.min(newX, window.innerWidth - timetableWidget.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - timetableWidget.offsetHeight));
-                timetableWidget.style.left = `${newX}px`;
-                timetableWidget.style.top = `${newY}px`;
-            } else if (isResizing) {
-                const newWidth = e.clientX - timetableWidget.getBoundingClientRect().left;
-                const newHeight = e.clientY - timetableWidget.getBoundingClientRect().top;
-                timetableWidget.style.width = `${newWidth}px`;
-                timetableWidget.style.height = `${newHeight}px`;
-                timetableBody.style.height = 'calc(100% - 40px)';
-                localStorage.setItem('timetableWidgetSize', JSON.stringify({ width: timetableWidget.style.width, height: timetableWidget.style.height }));
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('timetableWidgetPosition', JSON.stringify({ left: timetableWidget.style.left, top: timetableWidget.style.top }));
-            }
-            if (isResizing) isResizing = false;
-        });
-
-        resizeHandle.addEventListener('mousedown', (e) => {
+        let isResizing = false;
+        makeDraggable(timetableWidget, timetableHeader, 'timetableWidgetPosition', signal);
+        resizeHandle.addEventListener('pointerdown', (event) => {
             isResizing = true;
-            e.preventDefault();
-            e.stopPropagation();
-        });
-
+            resizeHandle.setPointerCapture?.(event.pointerId);
+            event.preventDefault();
+            event.stopPropagation();
+        }, { signal });
+        document.addEventListener('pointermove', (event) => {
+            if (!isResizing) return;
+            timetableWidget.style.width = `${Math.max(50, event.clientX - timetableWidget.getBoundingClientRect().left)}px`;
+            timetableWidget.style.height = `${Math.max(50, event.clientY - timetableWidget.getBoundingClientRect().top)}px`;
+            timetableBody.style.height = 'calc(100% - 40px)';
+            localStorage.setItem('timetableWidgetSize', JSON.stringify({ width: timetableWidget.style.width, height: timetableWidget.style.height }));
+        }, { signal });
+        document.addEventListener('pointerup', () => { isResizing = false; }, { signal });
         loadSavedPositionAndSize(timetableWidget, 'timetableWidgetPosition', 'timetableWidgetSize');
+
+        return () => {
+            controller.abort();
+            if (timetableWidget === document.getElementById('timetableWidget')) timetableWidget = undefined;
+        };
     }
 
     function addTodoList() {
         todoWidget = document.createElement('div');
         todoWidget.id = 'todoWidget';
+        const controller = new AbortController();
+        const { signal } = controller;
 
         const todoHeader = document.createElement('div');
         todoHeader.textContent = '📝 Todo List';
         todoHeader.style.fontWeight = 'bold';
         todoHeader.style.marginBottom = '5px';
         todoHeader.style.cursor = 'move';
-
         const todoInput = document.createElement('input');
         todoInput.placeholder = 'Add a new task...';
         Object.assign(todoInput.style, { width: '90%', padding: '5px', borderRadius: '3px', border: '1px solid #ddd' });
-
         const todoList = document.createElement('ul');
         const resizeHandle = document.createElement('div');
         resizeHandle.className = 'resize-handle';
-
-        todoWidget.appendChild(todoHeader);
-        todoWidget.appendChild(todoInput);
-        todoWidget.appendChild(todoList);
-        todoWidget.appendChild(resizeHandle);
+        todoWidget.append(todoHeader, todoInput, todoList, resizeHandle);
         document.body.appendChild(todoWidget);
 
-        const savedTodos = JSON.parse(localStorage.getItem('todoItems')) || [];
-        savedTodos.forEach(addTodoItem);
+        const storedTodos = JSON.parse(localStorage.getItem('todoItems')) || [];
+        let todos = storedTodos.map((todo, index) => typeof todo === 'string'
+            ? { id: `legacy-${index}-${Date.now()}`, text: todo, completed: false }
+            : todo);
+        const saveTodos = () => localStorage.setItem('todoItems', JSON.stringify(todos));
+        const renderTodos = () => {
+            todoList.replaceChildren();
+            todos.forEach((todo, index) => {
+                const item = document.createElement('li');
+                item.textContent = `${index + 1}. ${todo.text}`;
+                item.style.textDecoration = todo.completed ? 'line-through' : 'none';
+                item.addEventListener('click', () => {
+                    todo.completed = !todo.completed;
+                    saveTodos();
+                    renderTodos();
+                }, { signal });
+                item.addEventListener('dblclick', () => {
+                    todos = todos.filter(({ id }) => id !== todo.id);
+                    saveTodos();
+                    renderTodos();
+                }, { signal });
+                todoList.appendChild(item);
+            });
+        };
+        saveTodos();
+        renderTodos();
 
-        todoInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && todoInput.value.trim() !== '') {
-                addTodoItem(todoInput.value.trim());
-                todoInput.value = '';
-            }
-        });
+        todoInput.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' || !todoInput.value.trim()) return;
+            todos.push({ id: crypto.randomUUID(), text: todoInput.value.trim(), completed: false });
+            todoInput.value = '';
+            saveTodos();
+            renderTodos();
+        }, { signal });
 
-        let isDragging = false, isResizing = false, offsetX, offsetY;
-        let startX, startY, startWidth, startHeight;
-
-        todoHeader.addEventListener('mousedown', (e) => {
-            if (isResizing) return;
-            isDragging = true;
-            offsetX = e.clientX - todoWidget.offsetLeft;
-            offsetY = e.clientY - todoWidget.offsetTop;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                let newX = e.clientX - offsetX;
-                let newY = e.clientY - offsetY;
-                newX = Math.max(0, Math.min(newX, window.innerWidth - todoWidget.offsetWidth));
-                newY = Math.max(0, Math.min(newY, window.innerHeight - todoWidget.offsetHeight));
-                todoWidget.style.left = `${newX}px`;
-                todoWidget.style.top = `${newY}px`;
-            } else if (isResizing) {
-                const deltaX = e.clientX - startX;
-                const deltaY = e.clientY - startY;
-                const newWidth = Math.max(startWidth + deltaX, 50);
-                const newHeight = Math.max(startHeight + deltaY, 50);
-                todoWidget.style.width = `${newWidth}px`;
-                todoWidget.style.height = `${newHeight}px`;
-                localStorage.setItem('todoWidgetSize', JSON.stringify({ width: todoWidget.style.width, height: todoWidget.style.height }));
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                localStorage.setItem('todoWidgetPosition', JSON.stringify({ left: todoWidget.style.left, top: todoWidget.style.top }));
-            }
-            if (isResizing) isResizing = false;
-        });
-
-        resizeHandle.addEventListener('mousedown', (e) => {
+        let isResizing = false;
+        let startX = 0, startY = 0, startWidth = 0, startHeight = 0;
+        makeDraggable(todoWidget, todoHeader, 'todoWidgetPosition', signal);
+        resizeHandle.addEventListener('pointerdown', (event) => {
             isResizing = true;
-            e.preventDefault();
-            e.stopPropagation();
-            startX = e.clientX;
-            startY = e.clientY;
-            startWidth = parseInt(document.defaultView.getComputedStyle(todoWidget).width, 10);
-            startHeight = parseInt(document.defaultView.getComputedStyle(todoWidget).height, 10);
-        });
-
+            startX = event.clientX;
+            startY = event.clientY;
+            startWidth = todoWidget.offsetWidth;
+            startHeight = todoWidget.offsetHeight;
+            resizeHandle.setPointerCapture?.(event.pointerId);
+            event.preventDefault();
+            event.stopPropagation();
+        }, { signal });
+        document.addEventListener('pointermove', (event) => {
+            if (!isResizing) return;
+            todoWidget.style.width = `${Math.max(startWidth + event.clientX - startX, 50)}px`;
+            todoWidget.style.height = `${Math.max(startHeight + event.clientY - startY, 50)}px`;
+            localStorage.setItem('todoWidgetSize', JSON.stringify({ width: todoWidget.style.width, height: todoWidget.style.height }));
+        }, { signal });
+        document.addEventListener('pointerup', () => { isResizing = false; }, { signal });
         loadSavedPositionAndSize(todoWidget, 'todoWidgetPosition', 'todoWidgetSize');
         if (!localStorage.getItem('todoWidgetSize')) {
             todoWidget.style.width = '150px';
             todoWidget.style.height = '200px';
         }
 
-        function addTodoItem(todoText) {
-            const todoItem = document.createElement('li');
-            const index = todoList.children.length + 1;
-            todoItem.textContent = `${index}. ${todoText}`;
-            todoItem.addEventListener('click', () => {
-                todoItem.style.textDecoration = (todoItem.style.textDecoration === 'line-through') ? 'none' : 'line-through';
-            });
-            todoItem.addEventListener('dblclick', () => {
-                todoItem.remove();
-                saveTodos();
-                updateTodoIndices();
-            });
-            todoList.appendChild(todoItem);
-            saveTodos();
-        }
-
-        function saveTodos() {
-            const todos = Array.from(todoList.children).map(item => item.textContent.split('. ')[1]);
-            localStorage.setItem('todoItems', JSON.stringify(todos));
-        }
-
-        function updateTodoIndices() {
-            Array.from(todoList.children).forEach((item, index) => {
-                const text = item.textContent.split('. ')[1];
-                item.textContent = `${index + 1}. ${text}`;
-            });
-        }
+        return () => {
+            controller.abort();
+            if (todoWidget === document.getElementById('todoWidget')) todoWidget = undefined;
+        };
     }
 
     /*** Dark Mode Toggle ***/
@@ -1356,9 +1343,9 @@
             const savedPrimaryDark = localStorage.getItem('themePrimaryDark') || '#0056b3';
             setTheme(savedPrimary, savedPrimaryDark);
 
-            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) addClock();
-            if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) addClassTimetable();
-            if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) addTodoList();
+            if (JSON.parse(localStorage.getItem('clockWidget') || 'true')) widgetManager.mount('clockWidget', addClock);
+            if (JSON.parse(localStorage.getItem('timetableWidget') || 'true')) widgetManager.mount('timetableWidget', addClassTimetable);
+            if (JSON.parse(localStorage.getItem('todoWidget') || 'true')) widgetManager.mount('todoWidget', addTodoList);
         }
     }
 
