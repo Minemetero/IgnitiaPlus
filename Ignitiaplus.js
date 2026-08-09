@@ -797,9 +797,9 @@
             displaySpan.textContent = "0.00";
             stopwatchWidget.appendChild(displaySpan);
 
-            let startTime = Date.now();
+            const storedStartTime = parseInt(localStorage.getItem('stopwatchStartTime') || '0', 10);
+            let startTime = storedStartTime > 0 ? storedStartTime : Date.now();
             let elapsedTime = 0;
-            let timer = null;
             let running = false;
 
             function updateTimer() {
@@ -837,22 +837,9 @@
 
             function startTimer() {
                 if (running) return;
-                startTime = Date.now();
                 running = true;
-                requestAnimationFrame(updateTimer);
-
                 localStorage.setItem('stopwatchStartTime', startTime.toString());
-                document.addEventListener('visibilitychange', handleVisibilityChange);
-            }
-
-            function handleVisibilityChange() {
-                if (document.visibilityState === 'visible') {
-                    const storedStartTime = parseInt(localStorage.getItem('stopwatchStartTime') || '0', 10);
-                    if (storedStartTime > 0) {
-                        startTime = storedStartTime;
-                        running = true;
-                    }
-                }
+                requestAnimationFrame(updateTimer);
             }
 
             // Drag functionality
