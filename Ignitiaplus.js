@@ -416,12 +416,6 @@
         bannerTabDividers.forEach(divider => divider.remove());
     }
 
-    function removeLoginError() {
-        const loginError = document.querySelector('.login-error.alert.alert-error');
-        if (loginError) {
-            loginError.remove();
-        }
-    }
 
     function logOut() { /***(Credit:BurdenOwl)***/
         const passwordResetForm = document.getElementById("passwordResetFormWrapper");
@@ -1336,7 +1330,6 @@
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
             createLoginQuoteToggle();
             if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
-            removeLoginError();
         } else {
             modifyPageHead();
             removeUnwantedElements();
