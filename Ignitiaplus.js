@@ -19,7 +19,7 @@
     'use strict';
 
     let clockWidget, timetableWidget, todoWidget;
-    let footerController;
+    let footerController, quoteController;
     const widgetManager = createWidgetManager();
 
     /*** CSS Injection ***/
@@ -711,8 +711,7 @@
         const widgets = [
             { name: 'Clock', id: 'clockWidget', init: addClock },
             { name: 'Class Timetable', id: 'timetableWidget', init: addClassTimetable },
-            { name: 'Todo List', id: 'todoWidget', init: addTodoList },
-            { name: 'Quote', id: 'quoteWidget', init: addInspirationalQuoteWidget }
+            { name: 'Todo List', id: 'todoWidget', init: addTodoList }
         ];
 
         widgets.forEach(widget => {
@@ -1207,32 +1206,54 @@
     }
 
     /*** Inspirational Quote ***/
+    function setQuoteEnabled(enabled) {
+        localStorage.setItem('quoteWidget', enabled);
+        quoteController?.abort();
+        quoteController = undefined;
+        document.getElementById('quoteWidget')?.remove();
+        if (enabled) addInspirationalQuoteWidget();
+    }
+
+    function createLoginQuoteToggle() {
+        const toggle = document.createElement('button');
+        toggle.id = 'quote-toggle';
+        Object.assign(toggle.style, {
+            position: 'fixed', bottom: '10px', left: '10px', zIndex: '1001',
+            padding: '6px 10px', borderRadius: '4px', border: 'none', cursor: 'pointer'
+        });
+        const updateLabel = () => {
+            toggle.textContent = JSON.parse(localStorage.getItem('quoteWidget') || 'true') ? 'Hide quote' : 'Show quote';
+        };
+        toggle.addEventListener('click', () => {
+            const enabled = !JSON.parse(localStorage.getItem('quoteWidget') || 'true');
+            setQuoteEnabled(enabled);
+            updateLabel();
+        });
+        updateLabel();
+        document.body.appendChild(toggle);
+    }
+
     async function addInspirationalQuoteWidget() {
-        if (!window.location.pathname.startsWith('/owsoo/login/auth')) {
-            return;
-        }
-        if (document.getElementById('quoteWidget')) return;
+        if (!window.location.pathname.startsWith('/owsoo/login/auth') || document.getElementById('quoteWidget')) return;
 
-        const quotesURL = "https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json";
+        quoteController?.abort();
+        quoteController = new AbortController();
+        const { signal } = quoteController;
+        const quotesURL = 'https://raw.githubusercontent.com/Minemetero/IgnitiaPlus/refs/heads/main/qutoes.json';
         try {
-            const response = await fetch(quotesURL, { cache: "no-store" });
+            const response = await fetch(quotesURL, { cache: 'no-store', signal });
             if (!response.ok) {
-                console.error("Failed to load quotes:", response.statusText);
+                console.error('Failed to load quotes:', response.statusText);
                 return;
             }
-
             const quotes = await response.json();
-            if (!Array.isArray(quotes) || quotes.length === 0) {
-                console.error("Quotes file is empty or not an array.");
-                return;
-            }
+            if (!Array.isArray(quotes) || quotes.length === 0 || signal.aborted) return;
 
             const today = new Date();
             const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000);
-            const quote = quotes[dayOfYear % quotes.length];
-            displayQuote(quote);
+            displayQuote(quotes[dayOfYear % quotes.length]);
         } catch (error) {
-            console.error("Error fetching quotes:", error);
+            if (error?.name !== 'AbortError') console.error('Error fetching quotes:', error);
         }
     }
 
@@ -1326,6 +1347,7 @@
     async function init() {
         injectCSS();
         if (window.location.pathname.startsWith('/owsoo/login/auth')) {
+            createLoginQuoteToggle();
             if (JSON.parse(localStorage.getItem('quoteWidget') || 'true')) addInspirationalQuoteWidget();
             removeLoginError();
         } else {
